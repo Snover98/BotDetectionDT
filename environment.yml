@@ -1,0 +1,10 @@
+name: BotDetection
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - tweepy
+  - gensim
+#  # all pip dependencies
+#  - pip:
+#      - gdelt
