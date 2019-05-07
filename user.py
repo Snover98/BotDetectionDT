@@ -1,5 +1,4 @@
 import tweepy
-import conn
 
 
 class Tweet:
@@ -29,5 +28,4 @@ class User:
         self.lang = user_d.lang
         self.name = user_d.name
         self.image_url = user_d.profile_image_url_https
-        self.status_description = None
         self.tweets = [Tweet(tweet) for tweet in time_line]
