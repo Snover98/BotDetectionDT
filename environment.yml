@@ -1,10 +1,15 @@
 name: BotDetection
 channels:
+  - pytorch
   - conda-forge
   - defaults
 dependencies:
   - tweepy
   - gensim
+  - pandas
+  - pytorch=1.0.1
+  - torchvision==0.2.1
+  - numpy
 #  # all pip dependencies
 #  - pip:
 #      - gdelt
