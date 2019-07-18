@@ -8,7 +8,6 @@ class Tweet:
         self.entities = tweet.entities
         self.favorite_count = tweet.favorite_count
         self.is_quote = tweet.is_quote_status
-        self.retweet_count = tweet.retweet
         if hasattr(tweet, 'retweeted_status'):
             self.retweeted_status = Tweet(tweet.retweeted_status)
         else:
@@ -18,8 +17,9 @@ class Tweet:
 
 class User:
     def __init__(self, api: tweepy.api, user_id: int):
-        time_line = api.user_timeline(user_id, tweet_mode='extended',count=100)
+        time_line = api.user_timeline(user_id, tweet_mode='extended', count=100)
         user_d = api.get_user(user_id, tweet_mode='extended')
+
         self.id = user_id
         self.screen_name = user_d.screen_name
         self.description = user_d.description

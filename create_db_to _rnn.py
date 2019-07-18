@@ -26,11 +26,14 @@ def get_users():
     return users
 
 
-def create_db():
-    db = pd.DataFrame(columns=["batch_idx", "seq"])
+def create_db_for_rnn():
+    db = pd.DataFrame(columns=["seq_idx", "seq", "mentions", "urls"])
     users = get_users()
 
     for idx, user in enumerate(users):
         for tweet in user.tweets:
-            db.append({"batch_idx": idx, "seq": tweet.text})
+            db.append({"seq_idx": idx, "seq": tweet.text, "mentions": tweet.entities["user_mentions"],
+                       "urls": tweet.entities["urls"] + tweet.entities["media"]})
     return db
+
+

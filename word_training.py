@@ -2,20 +2,35 @@ from gensim.models import Word2Vec
 import pandas as pd
 import re
 from random import randint
+import numpy as np
+import nltk
+from nltk.tokenize import word_tokenize as wt
 
 
-def train(model: Word2Vec, db: pd.DataFrame, num_batch: int, num_epoches: int):
-    max_batch = db["batch_idx"].max()
+def w2v_pre_process(string: str, mentions, urls):
+    string = re.sub(r"(?<=[\s\A])@(?=[\s\Z])", "at", string)
 
-    if num_batch > max_batch:
-        num_batch = max_batch
+    # replace mentions with @
+    for mention in mentions:
+        screen_name = mention["screen_name"]
+        string = string.replace(f"@{screen_name}", "@")
 
-    batches = [randint(0, max_batch) for _ in range(num_batch)]
-    batch = db["batch_idx" in batches]
+    # remove $
+    string = string.replace("$", " ")
 
-    seqs = batch["seq"]
-    word_list = []
-    for seq in seqs:
-        word_list.append(re.sub("[^\w]", " ", seq).split())
-        
-    model.train(word_list, total_examples=len(word_list), epochs=num_epoches)
+    # replace the urls with $
+    for url in urls:
+        url_str = url["url"]
+        string = string.replace(url_str, "$")
+
+    # remove special chars
+    string = re.sub(r"[^\w@\$]", " ", string)
+
+    tokens = wt(string)
+    return tokens
+
+
+def train(model: Word2Vec, db: pd.DataFrame, batch_size: int, num_epoches: int = None):
+    word_lists = [w2v_pre_process(row["seq"], row["mentions"], row["urls"]) for _, row in db.iterrows()]
+    model.train(word_lists, total_examples=len(word_lists), epochs=num_epoches)
+    return model
