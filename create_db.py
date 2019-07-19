@@ -46,7 +46,6 @@ def insert_user(conn, user: User):
 
             query = f"""INSERT INTO tweets(user_id,date_time,favorite_count,is_quote,tweet_text)
             VALUES({user.id},'{tweet.date}',{tweet.favorite_count},{is_q},'{tweet.text.replace("'","")}');"""
-            print(query)
             ex.execute(query)
 
             query = f"""SELECT * FROM tweets;"""
@@ -72,7 +71,7 @@ def create_tabels(ex):
                             ,followers_count integer,friends_count integer ,lang text Not NULL ,user_name text NOT NULL, img_url text);"""
     ex.execute(create_table)
 
-    create_table = """CREATE TABLE IF NOT EXISTS tweets ( user_id integer,date_time text NOT NULL,
+    create_table = """CREATE TABLE IF NOT EXISTS tweets ( tweet_id integer PRIMARY KEY AUTOINCREMENT ,user_id integer,date_time text NOT NULL,
                             favorite_count integer , is_quote integer, tweet_text text NOT NULL,
                              FOREIGN KEY(user_id) REFERENCES users(id));"""
     ex.execute(create_table)
@@ -97,6 +96,30 @@ def reset_database(ex):
     ex.execute(query)
     query = "DROP TABLE urls;"
     ex.execute(query)
+    exit()
+
+
+def show_database(ex):
+    query = "SELECT * FROM users;"
+    ex.execute(query)
+    rows = ex.fetchall()
+    print(rows)
+
+    query = "SELECT * FROM tweets;"
+    ex.execute(query)
+    rows = ex.fetchall()
+    print(rows)
+
+    query = "SELECT * FROM mentions;"
+    ex.execute(query)
+    rows = ex.fetchall()
+    print(rows)
+
+    query = "SELECT * FROM urls;"
+    ex.execute(query)
+    rows = ex.fetchall()
+    print(rows)
+    exit()
 
 
 if __name__ == '__main__':
@@ -104,6 +127,7 @@ if __name__ == '__main__':
     ex = conn.cursor()
 
     create_tabels(ex)
+
     insert_data(ex)
 
     conn.commit()
