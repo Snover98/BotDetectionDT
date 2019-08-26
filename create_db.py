@@ -2,6 +2,7 @@ import sqlite3
 from sqlite3 import Error
 from user import User
 from create_db_to_rnn import get_users
+import pandas as pd
 
 
 def init_create_connection(db_file):
@@ -127,9 +128,33 @@ def show_database(ex):
     exit()
 
 
-if __name__ == '__main__':
+def get_tweets():
+    df = pd.DataFrame(columns=["seq_idx", "seq", "mentions", "urls"])
+
     conn = create_connection("pythonsqlite.db")
     ex = conn.cursor()
-    show_database(ex)
-    ex.close()
-    conn.close()
+
+    query = "SELECT * FROM tweets;"
+    ex.execute(query)
+    tweets = ex.fetchall()
+    print(tweets[1][0])
+    query = "SELECT * FROM mentions;"
+    ex.execute(query)
+    mentions = ex.fetchall()
+
+    query = "SELECT * FROM urls;"
+    ex.execute(query)
+    urls = ex.fetchall()
+
+    for tweet in tweets:
+        tweet_id = tweet[0]
+        tweet_text = tweet[1]
+        mentions_spesi = [mention[1] for mention in mentions if mention[0] == tweet_id]
+        urls_spesi = [url[1] for url in urls if url[0] == tweet_id]
+        df.append({"seq_idx": tweet_id, "seq": tweet_text, "mentions": mentions_spesi, "urls": urls_spesi})
+
+    return df
+
+
+if __name__ == '__main__':
+    get_tweets()

@@ -1,11 +1,12 @@
 from gensim.models import Word2Vec
+from gensim.test.utils import common_texts
 import pandas as pd
 import re
 from random import randint
 import numpy as np
 import nltk
 import torch
-
+from create_db import get_tweets
 from nltk.tokenize import word_tokenize as wt
 
 
@@ -32,9 +33,16 @@ def w2v_pre_process(string: str, mentions, urls):
     return tokens
 
 
-def train(model: Word2Vec, db: pd.DataFrame, batch_size: int, num_epoches: int = None):
+def train(model: Word2Vec, db: pd.DataFrame, num_epoches: int = None):
     word_lists = [w2v_pre_process(row["seq"], row["mentions"], row["urls"]) for _, row in db.iterrows()]
     model.train(word_lists, total_examples=len(word_lists), epochs=num_epoches)
+    return model
+
+
+def train_wtv_on_tweets():
+    model = Word2Vec(common_texts, size=100, window=5, min_count=1, workers=4)
+    df = get_tweets()
+    model = train(model, df, 5)
     return model
 
 
