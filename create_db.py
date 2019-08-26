@@ -138,6 +138,8 @@ def get_tweets():
     ex.execute(query)
     tweets = ex.fetchall()
 
+    print(tweets[1][1])
+
     query = "SELECT * FROM mentions;"
     ex.execute(query)
     mentions = ex.fetchall()
@@ -149,6 +151,8 @@ def get_tweets():
     for tweet in tweets:
         tweet_id = tweet[0]
         tweet_text = tweet[5]
+        if tweet[1] == 3098421349:
+            print(tweet_text)
         mentions_spesi = [mention[1] for mention in mentions if mention[0] == tweet_id]
         urls_spesi = [url[1] for url in urls if url[0] == tweet_id]
         df = df.append({"seq_idx": tweet_id, "seq": tweet_text, "mentions": mentions_spesi, "urls": urls_spesi},
