@@ -148,7 +148,7 @@ def get_tweets():
 
     for tweet in tweets:
         tweet_id = tweet[0]
-        tweet_text = tweet[1]
+        tweet_text = tweet[5]
         mentions_spesi = [mention[1] for mention in mentions if mention[0] == tweet_id]
         urls_spesi = [url[1] for url in urls if url[0] == tweet_id]
         df = df.append({"seq_idx": tweet_id, "seq": tweet_text, "mentions": mentions_spesi, "urls": urls_spesi},
