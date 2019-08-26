@@ -1,6 +1,6 @@
 from user import User
 import pandas as pd
-import conn
+import conn as c
 from langdetect import detect
 
 
@@ -10,17 +10,22 @@ def is_eng(tweet):
 
 def get_users():
     df = pd.read_csv("db/varol-2017.csv")
-
-    ids = df['ID'].astype(int)
-    api = conn.connect()
+    ids = df['ID']
+    api = c.connect()
     users = []
+    bad_user = []
     for id in ids:
-        user = User(api, id)
-        flag = True
-        for tweet in user.tweets:
-            if not is_eng(tweet):
-                flag = False
-                break
+        try:
+            user = User(api, id)
+            flag = True
+            for tweet in user.tweets:
+                if not is_eng(tweet):
+                    flag = False
+                    break
+        except Exception as e:
+            bad_user.append(id)
+            flag = False
+
         if flag:
             users.append(user)
     return users
