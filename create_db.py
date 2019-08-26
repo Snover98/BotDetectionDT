@@ -1,7 +1,30 @@
 import sqlite3
 from sqlite3 import Error
 from user import User
+from langdetect import detect
+import pandas as pd
 import conn as c
+
+
+def is_eng(tweet):
+    return detect(tweet.text) == 'en'
+
+
+def get_users():
+    df = pd.read_csv("db/varol-2017.csv")
+    ids = df['ID']
+    api = c.connect()
+    users = []
+    for id in ids:
+        user = User(api, id)
+        flag = True
+        for tweet in user.tweets:
+            if not is_eng(tweet):
+                flag = False
+                break
+        if flag:
+            users.append(user)
+    return users
 
 
 def init_create_connection(db_file):
@@ -84,7 +107,12 @@ def create_tabels(ex):
 
 
 def insert_data(ex):
-    pass
+    try:
+        users = get_users()
+        for user in users:
+            insert_user(ex, user)
+    except Error as e:
+        print("hhhhh")
 
 
 def reset_database(ex):
@@ -127,9 +155,11 @@ if __name__ == '__main__':
     ex = conn.cursor()
 
     create_tabels(ex)
-
-    insert_data(ex)
-
-    conn.commit()
-    ex.close()
-    conn.close()
+    try:
+        insert_data(conn)
+    except Error as e:
+        pass
+    finally:
+        conn.commit()
+        ex.close()
+        conn.close()
