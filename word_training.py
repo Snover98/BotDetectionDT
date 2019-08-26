@@ -43,7 +43,5 @@ def embed(model: Word2Vec, tweets: list):
     for tweet in tweets:
         word_list = w2v_pre_process(tweet.text, tweet.entities["user_mentions"],
                                     tweet.entities["urls"] + tweet.entities["media"])
-        embedded_list = [torch.from_numpy(model.wv.word_vec(word)) for word in word_list]
-        seq = torch.stack(embedded_list)
-        seq_list.append(seq)
+        seq_list.append(torch.stack([torch.from_numpy(model.wv.word_vec(word)) for word in word_list]))
     return seq_list
