@@ -10,7 +10,7 @@ from nltk.tokenize import word_tokenize as wt
 
 
 def w2v_pre_process(string: str, mentions, urls):
-    string = re.sub(r"(?<=[\s\A])@(?=[\s\Z])", "at", string)
+    string = re.sub(r"(?<=[\s^])@(?=[\s$])", "at", string)
 
     # replace mentions with @
     for mention in mentions:
