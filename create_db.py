@@ -15,13 +15,19 @@ def get_users():
     ids = df['ID']
     api = c.connect()
     users = []
+    bad_user = []
     for id in ids:
-        user = User(api, id)
-        flag = True
-        for tweet in user.tweets:
-            if not is_eng(tweet):
-                flag = False
-                break
+        try:
+            user = User(api, id)
+            flag = True
+            for tweet in user.tweets:
+                if not is_eng(tweet):
+                    flag = False
+                    break
+        except Exception as e:
+            bad_user.append(id)
+            flag = False
+
         if flag:
             users.append(user)
     return users
@@ -111,7 +117,7 @@ def insert_data(ex):
         users = get_users()
         for user in users:
             insert_user(ex, user)
-    except Error as e:
+    except Exception as e:
         print("hhhhh")
 
 
