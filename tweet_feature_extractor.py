@@ -1,7 +1,9 @@
 import torch
 from torch import nn
 from typing import List
-from user import User
+from user import User, Tweet
+from torch.nn.utils.rnn import pad_sequence, pack_padded_sequence, pad_packed_sequence
+import word_training as wt
 
 
 class TweetFeatureExtractor(nn.Module):
@@ -30,7 +32,7 @@ class TweetFeatureExtractor(nn.Module):
             nn.Linear(2 * output_dim, output_dim)
         )
 
-    def forward(self, inputs: List[User]):
+    def forward(self, inputs: List[List[Tweet]]):
         """
         TODO:
         1) for each user take it's tweets and use word2vec to create as sequence of vectors for each tweet
@@ -48,25 +50,27 @@ class TweetFeatureExtractor(nn.Module):
 
         # TASK 1
         # TODO actually use word2vec
-        sequences = None
-        seq_end_indices = None
-        num_tweets = len(sequences)
+        sequences = [wt.embed(self.word2vec_model, user_tweets) for user_tweets in inputs]
+        seq_end_lengths = [seq.shape[1] for seq in sequences]
+        num_tweets = len(seq_end_lengths)
 
         # TASK 2
         # DON'T FORGET TO USE PADDING AND PACKING FOR INPUT
         # TODO actually pack the outputs
-        packed_seq_batch = None
+        padded_seq_batch = pad_sequence(sequences, batch_first=True)
+        packed_seq_batch = pack_padded_sequence(padded_seq_batch, seq_end_lengths, batch_first=True)
 
         # TASK 3
         # DON'T FORGET TO UNDO THE PADDING AND PACKING FROM TASK 3
-        recurrent_features = self.recurrent_extractor(packed_seq_batch)
+        recurrent_features = pad_packed_sequence(self.recurrent_extractor(packed_seq_batch), batch_first=True)
 
         # TASK 4
         # TODO make sure that this unpacking is correct
-        used_reccurent_features = recurrent_features[range(num_tweets), seq_end_indices, range(self.hidden_dim)]
+        seq_end_indices = [l - 1 for l in seq_end_lengths]
+        used_recurrent_features = recurrent_features[range(num_tweets), seq_end_indices, range(self.hidden_dim)]
 
         # TASK 5
-        recurrent_features_batch = used_reccurent_features.view(len(inputs), -1, self.hidden_dim)
+        recurrent_features_batch = used_recurrent_features.view(len(inputs), -1, self.hidden_dim)
 
         # TASK 6
         # TODO add more info for each tweet
