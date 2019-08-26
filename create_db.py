@@ -30,6 +30,7 @@ def get_users():
 
         if flag:
             users.append(user)
+
     return users
 
 
@@ -159,7 +160,6 @@ def show_database(ex):
 if __name__ == '__main__':
     conn = create_connection("pythonsqlite.db")
     ex = conn.cursor()
-
     create_tabels(ex)
     try:
         insert_data(conn)

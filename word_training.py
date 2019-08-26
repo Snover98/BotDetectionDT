@@ -4,6 +4,8 @@ import re
 from random import randint
 import numpy as np
 import nltk
+import torch
+
 from nltk.tokenize import word_tokenize as wt
 
 
@@ -34,3 +36,14 @@ def train(model: Word2Vec, db: pd.DataFrame, batch_size: int, num_epoches: int =
     word_lists = [w2v_pre_process(row["seq"], row["mentions"], row["urls"]) for _, row in db.iterrows()]
     model.train(word_lists, total_examples=len(word_lists), epochs=num_epoches)
     return model
+
+
+def embed(model: Word2Vec, tweets: list):
+    seq_list = []
+    for tweet in tweets:
+        word_list = w2v_pre_process(tweet.text, tweet.entities["user_mentions"],
+                                    tweet.entities["urls"] + tweet.entities["media"])
+        embedded_list = [torch.from_numpy(model.wv.word_vec(word)) for word in word_list]
+        seq = torch.stack(embedded_list)
+        seq_list.append(seq)
+    return seq_list
