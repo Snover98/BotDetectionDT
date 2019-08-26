@@ -1,9 +1,6 @@
 import sqlite3
 from sqlite3 import Error
 from user import User
-from langdetect import detect
-import pandas as pd
-import conn as c
 from create_db_to_rnn import get_users
 
 
@@ -111,34 +108,28 @@ def show_database(ex):
     query = "SELECT * FROM users;"
     ex.execute(query)
     rows = ex.fetchall()
-    print(rows)
+    print(len(rows))
 
     query = "SELECT * FROM tweets;"
     ex.execute(query)
     rows = ex.fetchall()
-    print(rows)
+    print(len(rows))
 
     query = "SELECT * FROM mentions;"
     ex.execute(query)
     rows = ex.fetchall()
-    print(rows)
+    print(len(rows))
 
     query = "SELECT * FROM urls;"
     ex.execute(query)
     rows = ex.fetchall()
-    print(rows)
+    print(len(rows))
     exit()
 
 
 if __name__ == '__main__':
     conn = create_connection("pythonsqlite.db")
     ex = conn.cursor()
-    create_tabels(ex)
-    try:
-        insert_data(conn)
-    except Error as e:
-        pass
-    finally:
-        conn.commit()
-        ex.close()
-        conn.close()
+    show_database(ex)
+    ex.close()
+    conn.close()
