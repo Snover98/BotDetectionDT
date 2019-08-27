@@ -21,6 +21,7 @@ class TweetFeatureExtractor(nn.Module):
         self.word2vec_model = word2vec_model
         self.embedding_dim = embedding_dim
         self.hidden_dim = hidden_dim
+        self.output_dim = output_dim
 
         self.recurrent_extractor = nn.LSTM(embedding_dim, hidden_dim, num_layers, batch_first=True, dropout=dropout)
 
@@ -35,7 +36,7 @@ class TweetFeatureExtractor(nn.Module):
     def forward(self, inputs: List[List[Tweet]]):
         """
         TODO:
-        1) for each user take it's tweets and use word2vec to create as sequence of vectors for each tweet
+        1) use word2vec to create as sequence of vectors for each tweet
             (i.e each tweet is a sequence of words)
         2) create a batch out of all of the sequences (num_users*tweets_per_user, max_seq_len, embedding_dim)
             (make sure to remember which tweets belong to which users)
@@ -50,7 +51,7 @@ class TweetFeatureExtractor(nn.Module):
 
         # TASK 1
         # TODO actually use word2vec
-        sequences = [wt.embed(self.word2vec_model, user_tweets) for user_tweets in inputs]
+        sequences = sum([wt.embed(self.word2vec_model, user_tweets) for user_tweets in inputs], start=[])
         seq_end_lengths = [seq.shape[1] for seq in sequences]
         num_tweets = len(seq_end_lengths)
 
@@ -76,7 +77,7 @@ class TweetFeatureExtractor(nn.Module):
         # TODO add more info for each tweet
 
         # TASK 7
-        recurrent_features_batch = recurrent_features_batch.view(len(inputs), -1)
+        recurrent_features_batch = recurrent_features_batch.view(-1, self.hidden_dim)
 
         # TASK 8
-        return self.feature_extractor(recurrent_features_batch)
+        return self.feature_extractor(recurrent_features_batch).view(len(inputs), -1, self.output_dim)
