@@ -34,10 +34,12 @@ def create_connection(db_file):
 def insert_user(conn, user: User):
     try:
         ex = conn.cursor()
-        query = f"""INSERT INTO users (id,screen_name,description,followers_count,friends_count,lang,user_name,img_url)
-         VALUES({user.id},'{user.screen_name}','{user.description}',{user.followers_count},{user.friends_count},'{user.lang}'
-         ,'{user.name}','{user.image_url}'); """
-        ex.execute(query)
+        query = """INSERT INTO users (id,screen_name,description,followers_count,friends_count,lang,user_name,img_url)
+         VALUES(?,?,?,?,?,?,?,?); """
+
+        ex.execute(query, (
+            user.id, user.screen_name, user.description, user.followers_count, user.friends_count, user.lang, user.name,
+            user.image_url))
 
         for tweet in user.tweets:
 
@@ -45,9 +47,9 @@ def insert_user(conn, user: User):
             if tweet.is_quote:
                 is_q = 1
 
-            query = f"""INSERT INTO tweets(user_id,date_time,favorite_count,is_quote,tweet_text)
-            VALUES({user.id},'{tweet.date}',{tweet.favorite_count},{is_q},'{tweet.text.replace("'","")}');"""
-            ex.execute(query)
+            query = """INSERT INTO tweets(user_id,date_time,favorite_count,is_quote,tweet_text)
+            VALUES(?,?,?,?,?);"""
+            ex.execute(query, (user.id, tweet.date, tweet.favorite_count, is_q, tweet.text))
 
             query = f"""SELECT * FROM tweets;"""
             ex.execute(query)
@@ -55,12 +57,12 @@ def insert_user(conn, user: User):
             result = len(result)
 
             for mention in tweet.entities["user_mentions"]:
-                query = f"""INSERT INTO mentions(tweet_id,mention) VALUES({result},'{mention["screen_name"]}');"""
-                ex.execute(query)
+                query = """INSERT INTO mentions(tweet_id,mention) VALUES(?,?);"""
+                ex.execute(query, (result, mention["screen_name"]))
 
             for url in tweet.entities["urls"]:
-                query = f"""INSERT INTO urls(tweet_id,url) VALUES({result},'{url["url"]}');"""
-                ex.execute(query)
+                query = """INSERT INTO urls(tweet_id,url) VALUES(?,?);"""
+                ex.execute(query, (result, url["url"]))
 
     except Error as e:
         print(e)
@@ -151,8 +153,6 @@ def get_tweets():
     for tweet in tweets:
         tweet_id = tweet[0]
         tweet_text = tweet[5]
-        if tweet[1] == 3098421349:
-            print(tweet_text)
         mentions_spesi = [mention[1] for mention in mentions if mention[0] == tweet_id]
         urls_spesi = [url[1] for url in urls if url[0] == tweet_id]
         df = df.append({"seq_idx": tweet_id, "seq": tweet_text, "mentions": mentions_spesi, "urls": urls_spesi},
@@ -162,5 +162,9 @@ def get_tweets():
 
 
 if __name__ == '__main__':
-    df = get_tweets()
-    print(df)
+    conn = create_connection("pythonsqlite.db")
+    ex = conn.cursor()
+    create_tabels(ex)
+    insert_data(ex)
+    conn.commit()
+    conn.close()
