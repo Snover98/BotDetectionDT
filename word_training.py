@@ -15,18 +15,17 @@ def w2v_pre_process(string: str, mentions, urls):
 
     # replace mentions with @
     for mention in mentions:
-        screen_name = mention["screen_name"]
-        string = string.replace(f"@{screen_name}", "@")
+        string = string.replace(f"@{mention}", "@")
 
     # remove $
     string = string.replace("$", " ")
 
     # replace the urls with $
     for url in urls:
-        url_str = url["url"]
-        string = string.replace(url_str, "$")
+        string = string.replace(url, "$")
 
     # remove special chars
+    string = re.sub(r"[\']", "", string)
     string = re.sub(r"[^\w@\$]", " ", string)
 
     tokens = wt(string)
@@ -49,7 +48,14 @@ def train_wtv_on_tweets():
 def embed(model: Word2Vec, tweets: list):
     seq_list = []
     for tweet in tweets:
-        word_list = w2v_pre_process(tweet.text, tweet.entities["user_mentions"],
-                                    tweet.entities["urls"] + tweet.entities["media"])
+        urls = tweet.entities["urls"]
+
+        if 'media' in tweet.entities.keys():
+            urls += tweet.entities["media"]
+
+        urls = [url['url'] for url in urls]
+        mentions = [mention['screen_name'] for mention in tweet.entities["user_mentions"]]
+
+        word_list = w2v_pre_process(tweet.text, mentions, urls)
         seq_list.append(torch.stack([torch.from_numpy(model.wv.word_vec(word)) for word in word_list]))
     return seq_list
