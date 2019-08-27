@@ -15,6 +15,13 @@ class BotClassifier(nn.Module):
 
         self.hidden_dim = hidden_dim
 
+        num_tweets_per_user = 100
+
+        self.tweets_combiner = nn.Sequential(
+            nn.Linear(num_tweets_per_user * tweet_features_dim, tweet_features_dim),
+            nn.ReLU()
+            )
+
         # does not account for the addition of general user data to the tensors
         self.classifier = nn.Sequential(
             nn.Linear(tweet_features_dim, hidden_dim),
@@ -33,14 +40,13 @@ class BotClassifier(nn.Module):
         """
 
         # TASK 1
-        users_tweets_features = self.tweet_feature_extractor([user.tweets for user in inputs])
+        users_tweets_features: torch.Tensor = self.tweet_feature_extractor([user.tweets for user in inputs])
 
         # TASK 2
-        # TODO combine each user's tweets' feature vectors into a single feature vector
+        users_tweets_features = self.tweets_combiner(users_tweets_features.view(len(inputs), -1))
 
         # TASK 3
         # TODO add more data about each user
 
         # TASK 4
         return self.classifier(users_tweets_features)
-

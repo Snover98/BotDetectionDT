@@ -28,9 +28,8 @@ class TweetFeatureExtractor(nn.Module):
         # at the moment this is without considering additional info about the tweets like the number of mentions, etc...
         # also the structure is arbitrary at the moment
         self.feature_extractor = nn.Sequential(
-            nn.Linear(hidden_dim, 2 * output_dim),
-            nn.ReLU(),
-            nn.Linear(2 * output_dim, output_dim)
+            nn.Linear(hidden_dim, output_dim),
+            nn.ReLU()
         )
 
     def forward(self, inputs: List[List[Tweet]]):
@@ -51,7 +50,7 @@ class TweetFeatureExtractor(nn.Module):
 
         # TASK 1
         # TODO actually use word2vec
-        sequences = sum([wt.embed(self.word2vec_model, user_tweets) for user_tweets in inputs], start=[])
+        sequences = wt.embed(self.word2vec_model, sum(inputs, start=[]))
         seq_end_lengths = [seq.shape[1] for seq in sequences]
         num_tweets = len(seq_end_lengths)
 
