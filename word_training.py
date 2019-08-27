@@ -8,6 +8,7 @@ import nltk
 import torch
 from create_db import get_tweets
 from nltk.tokenize import word_tokenize as wt
+from typing import List
 
 
 def w2v_pre_process(string: str, mentions, urls):
@@ -45,7 +46,7 @@ def train_wtv_on_tweets():
     return model
 
 
-def embed(model: Word2Vec, tweets: list):
+def embed(model: Word2Vec, tweets: List):
     seq_list = []
     for tweet in tweets:
         urls = tweet.entities["urls"]

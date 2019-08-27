@@ -27,16 +27,20 @@ class BotClassifier(nn.Module):
         """
         TODO:
         1) use the tweet feature extractor on the users
-        2) add some more general user data to the batch (for each user)
-        3) classify using these features
+        2) combine the features of each user's tweets into a single feature vector per user
+        3) add some more general user data to the batch (for each user)
+        4) classify using these features
         """
 
         # TASK 1
-        users_tweets_features = self.tweet_feature_extractor(inputs)
+        users_tweets_features = self.tweet_feature_extractor([user.tweets for user in inputs])
 
         # TASK 2
-        # TODO add more data about each user
+        # TODO combine each user's tweets' feature vectors into a single feature vector
 
         # TASK 3
+        # TODO add more data about each user
+
+        # TASK 4
         return self.classifier(users_tweets_features)
 
