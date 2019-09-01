@@ -71,7 +71,7 @@ def insert_user(conn, user: User):
 def create_tabels(ex):
     # create the tabels
     create_table = """CREATE TABLE IF NOT EXISTS users ( id integer PRIMARY KEY,screen_name text NOT NULL ,description text
-                            ,followers_count integer,friends_count integer ,lang text Not NULL ,user_name text NOT NULL, img_url text);"""
+                            ,followers_count integer,friends_count integer ,lang text,user_name text NOT NULL, img_url text);"""
     ex.execute(create_table)
 
     create_table = """CREATE TABLE IF NOT EXISTS tweets ( tweet_id integer PRIMARY KEY AUTOINCREMENT ,user_id integer,date_time text NOT NULL,
@@ -127,7 +127,7 @@ def show_database(ex):
     ex.execute(query)
     rows = ex.fetchall()
     print(len(rows))
-    exit()
+
 
 
 def get_tweets():
@@ -140,7 +140,6 @@ def get_tweets():
     ex.execute(query)
     tweets = ex.fetchall()
 
-    print(tweets[1][1])
 
     query = "SELECT * FROM mentions;"
     ex.execute(query)
@@ -165,6 +164,8 @@ if __name__ == '__main__':
     conn = create_connection("pythonsqlite.db")
     ex = conn.cursor()
     create_tabels(ex)
-    insert_data(ex)
+    insert_data(conn)
+    show_database(ex)
     conn.commit()
     conn.close()
+
