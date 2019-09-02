@@ -111,7 +111,7 @@ def show_database(ex):
     query = "SELECT * FROM users;"
     ex.execute(query)
     rows = ex.fetchall()
-    print(len(rows))
+    print(rows)
 
     query = "SELECT * FROM tweets;"
     ex.execute(query)
@@ -129,7 +129,6 @@ def show_database(ex):
     print(len(rows))
 
 
-
 def get_tweets():
     df = pd.DataFrame(columns=["seq_idx", "seq", "mentions", "urls"])
 
@@ -139,7 +138,6 @@ def get_tweets():
     query = "SELECT * FROM tweets;"
     ex.execute(query)
     tweets = ex.fetchall()
-
 
     query = "SELECT * FROM mentions;"
     ex.execute(query)
@@ -163,9 +161,5 @@ def get_tweets():
 if __name__ == '__main__':
     conn = create_connection("pythonsqlite.db")
     ex = conn.cursor()
-    create_tabels(ex)
-    insert_data(conn)
     show_database(ex)
-    conn.commit()
     conn.close()
-
