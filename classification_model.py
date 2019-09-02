@@ -18,13 +18,17 @@ class BotClassifier(nn.Module):
         num_tweets_per_user = 100
 
         self.tweets_combiner = nn.Sequential(
-            nn.Linear(num_tweets_per_user * tweet_features_dim, tweet_features_dim),
-            nn.ReLU()
+            nn.BatchNorm1d(num_tweets_per_user * tweet_features_dim),
+            nn.ReLU(),
+            nn.Linear(num_tweets_per_user * tweet_features_dim, tweet_features_dim)
             )
 
         # does not account for the addition of general user data to the tensors
         self.classifier = nn.Sequential(
+            nn.BatchNorm1d(tweet_features_dim),
+            nn.ReLU(),
             nn.Linear(tweet_features_dim, hidden_dim),
+            nn.BatchNorm1d(hidden_dim),
             nn.ReLU(),
             nn.Linear(hidden_dim, 2),
             nn.Softmax()
