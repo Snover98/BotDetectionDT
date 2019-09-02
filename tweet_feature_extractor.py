@@ -27,10 +27,7 @@ class TweetFeatureExtractor(nn.Module):
 
         # at the moment this is without considering additional info about the tweets like the number of mentions, etc...
         # also the structure is arbitrary at the moment
-        self.feature_extractor = nn.Sequential(
-            nn.Linear(hidden_dim, output_dim),
-            nn.ReLU()
-        )
+        self.feature_extractor = nn.Linear(hidden_dim, output_dim)
 
     @staticmethod
     def sorted_seq_by_len(sequences) -> Tuple[List[int], List[int]]:
