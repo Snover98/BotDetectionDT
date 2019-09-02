@@ -1,5 +1,4 @@
 from gensim.models import Word2Vec
-from gensim.test.utils import common_texts
 import pandas as pd
 import re
 from random import randint
@@ -35,12 +34,13 @@ def w2v_pre_process(string: str, mentions, urls):
 
 def train(model: Word2Vec, db: pd.DataFrame, num_epoches: int = None):
     word_lists = [w2v_pre_process(row["seq"], row["mentions"], row["urls"]) for _, row in db.iterrows()]
+    model.build_vocab(word_lists, progress_per=10000)
     model.train(word_lists, total_examples=len(word_lists), epochs=num_epoches)
     return model
 
 
 def train_wtv_on_tweets():
-    model = Word2Vec(common_texts, size=100, window=5, min_count=1, workers=4)
+    model = Word2Vec(size=100, window=5, min_count=1, workers=4)
     df = get_tweets()
     model = train(model, df, 5)
     return model
