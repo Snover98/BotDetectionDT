@@ -1,7 +1,7 @@
 import torch
 from torch import nn
-from typing import List
-from user import User, Tweet
+from typing import List, Tuple
+from user import Tweet
 from torch.nn.utils.rnn import pad_sequence, pack_padded_sequence, pad_packed_sequence
 import word_training as wt
 
@@ -32,6 +32,12 @@ class TweetFeatureExtractor(nn.Module):
             nn.ReLU()
         )
 
+    @staticmethod
+    def sorted_seq_by_len(sequences) -> Tuple[List[int], List[int]]:
+        seq_end_lengths_dict = {idx: seq.shape[0] for idx, seq in enumerate(sequences)}
+        sorted_indices, sorted_lengths = zip(*sorted(seq_end_lengths_dict.items(), key=lambda x: x[1], reverse=True))
+        return list(sorted_indices), list(sorted_lengths)
+
     def forward(self, inputs: List[List[Tweet]]):
         """
         TODO:
@@ -51,10 +57,9 @@ class TweetFeatureExtractor(nn.Module):
         # TASK 1
         # TODO actually use word2vec
         sequences = wt.embed(self.word2vec_model, sum(inputs, []))
-        seq_end_lengths_dict = {idx: seq.shape[0] for idx, seq in enumerate(sequences)}
-        sorted_indices, sorted_lengths = zip(*sorted(seq_end_lengths_dict.items(), key=lambda x: x[1], reverse=True))
-        sorted_indices, sorted_lengths = list(sorted_indices), list(sorted_lengths)
-        num_tweets = len(seq_end_lengths_dict)
+
+        sorted_indices, sorted_lengths = self.sorted_seq_by_len(sequences)
+        num_tweets = len(sorted_indices)
 
         # TASK 2
         # DON'T FORGET TO USE PADDING AND PACKING FOR INPUT
