@@ -10,6 +10,8 @@ dependencies:
   - pytorch=1.0.1
   - torchvision==0.2.1
   - numpy
+  - tqdm
+  - matplotlib
 #  # all pip dependencies
 #  - pip:
 #      - gdelt
