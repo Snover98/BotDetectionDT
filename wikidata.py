@@ -38,7 +38,8 @@ def get_info(items: list):
         item_output = []
         wikidataEntries = getItems(site, item)
         for wdEntry in wikidataEntries["search"]:
-            item_output.append(wdEntry['description'])
+            if wdEntry['description'] != 'Wikimedia disambiguation page':
+                item_output.append(wdEntry['description'])
         output.append(item_output)
     return output
 
