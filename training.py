@@ -23,7 +23,7 @@ class BatchResult(NamedTuple):
 
 
 class EpochResult(NamedTuple):
-    """
+    """f
     Represents the result of training for a single epoch: the loss per batch
     and accuracy on the dataset (train or test).
     """
@@ -285,9 +285,11 @@ class TorchTrainer(Trainer):
 
     def train_batch(self, batch) -> BatchResult:
         X, y = batch
+        """
         if self.device:
             X = X.to(self.device)
             y = y.to(self.device)
+        """
 
         # TODO: Train the PyTorch model on one batch of data.
         # - Forward pass
@@ -315,9 +317,11 @@ class TorchTrainer(Trainer):
 
     def test_batch(self, batch) -> BatchResult:
         X, y = batch
+        """
         if self.device:
             X = X.to(self.device)
             y = y.to(self.device)
+        """
 
         with torch.no_grad():
             # TODO: Evaluate the PyTorch model on one batch of data.

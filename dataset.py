@@ -1,10 +1,11 @@
-from torch.utils.data import Dataset
 import pandas as pd
 import torch
 import conn as c
 from user import User
 from create_db_to_rnn import is_eng
 import pickle
+from torch.utils import data
+from torch.utils.data import Dataset
 
 
 def get_users(df: pd.DataFrame):
@@ -54,7 +55,7 @@ class UsersDataset(Dataset):
             file.close()
 
     def __len__(self):
-        return len(self.users_frame)
+        return len(self.users)
 
     def __getitem__(self, idx):
         if torch.is_tensor(idx):
@@ -63,6 +64,21 @@ class UsersDataset(Dataset):
         return self.users[idx], self.labels[idx]
 
 
+def my_collate(batch):
+    data = [item[0] for item in batch]
+    target = [item[1] for item in batch]
+    target = torch.LongTensor(target)
+    return [data, target]
+
+
+def get_dataloaders(ds, train_ratio=0.8, batch_size=8):
+    train_amount = int(train_ratio * len(ds))
+    test_amount = len(ds) - train_amount
+    train_set, test_set = data.random_split(ds, (train_amount, test_amount))
+    train_dl = data.DataLoader(train_set, batch_size=batch_size, shuffle=True, num_workers=2, collate_fn=my_collate)
+    test_dl = data.DataLoader(test_set, batch_size=batch_size, shuffle=False, num_workers=2, collate_fn=my_collate)
+    return train_dl, test_dl
+
+
 if __name__ == "__main__":
     us_db = UsersDataset()
-
