@@ -16,8 +16,8 @@ if __name__ == "__main__":
 
     w2v_model = Word2Vec.load("../checkpoints/word2vec.model")
 
-    clf = BotClassifier(w2v_model, 100, 1024, 128, 1024)
-    optim = Adam(params=clf.parameters(), lr=1e-3)
+    clf = BotClassifier(w2v_model, 100, 1024, 128, 1024, use_gdelt=True)
+    optim = Adam(params=clf.parameters(), lr=9e-4)
     trainer = TorchTrainer(clf, loss_fn, optim, device='cuda' if torch.cuda.is_available() else 'cpu')
 
     fit_res = trainer.fit(train_dl, test_dl, num_epochs, 'clf_checkpoint.model', 3)

@@ -9,7 +9,7 @@ from gdelt_utils.conn_gdelt import get_topics_in_dates
 
 
 class TweetFeatureExtractor(nn.Module):
-    def __init__(self, word2vec_model, embedding_dim, hidden_dim, output_dim, num_layers=1, dropout=0):
+    def __init__(self, word2vec_model, embedding_dim, hidden_dim, output_dim, num_layers=1, dropout=0, use_gdelt=False):
         """
 
         :param word2vec_model: the actual model that would embed the tweets
@@ -24,7 +24,7 @@ class TweetFeatureExtractor(nn.Module):
         self.embedding_dim = embedding_dim
         self.hidden_dim = hidden_dim
         self.output_dim = output_dim
-
+        self.use_gdelt = use_gdelt
         self.recurrent_extractor = nn.LSTM(embedding_dim, hidden_dim, num_layers, batch_first=True, dropout=dropout)
 
         # at the moment this is without considering additional info about the tweets like the number of mentions, etc...
@@ -92,11 +92,15 @@ class TweetFeatureExtractor(nn.Module):
         diffs = get_tweets_diffs(inputs)
 
         # for user data
-        important_topics, intense_indexes = get_topics_in_dates(inputs, diffs, tweets_per_user)
+        if self.use_gdelt:
+            important_topics, intense_indexes = get_topics_in_dates(inputs, diffs, tweets_per_user)
+        else:
+            important_topics, intense_indexes = None, None
 
-        diffs = torch.cat(diffs).unsqueeze(1)
-        diffs = torch.norm(diffs)
-        print(torch.max(diffs), torch.min(diffs))
+        diffs = torch.cat(diffs)
+        diffs /= torch.max(diffs)
+        diffs = diffs.unsqueeze(1)
+
         # TASK 7
         recurrent_features_batch = recurrent_features_batch.view(-1, self.hidden_dim)
         recurrent_features_batch = torch.cat([recurrent_features_batch, diffs], 1)

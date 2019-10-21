@@ -7,12 +7,16 @@ from wikidata.wikidata import calculate_similarity_wikidata
 
 
 class BotClassifier(nn.Module):
-    def __init__(self, word2vec_model, embedding_dim, rec_hidden_dim, tweet_features_dim, hidden_dim, num_rec_layers=1,
+    def __init__(self, word2vec_model, embedding_dim, rec_hidden_dim, tweet_features_dim, hidden_dim, use_gdelt=False,
+                 num_rec_layers=1,
                  rec_dropout=0):
         super().__init__()
+
+        self.use_gdelt = use_gdelt
+
         self.tweet_feature_extractor = TweetFeatureExtractor(word2vec_model, embedding_dim, rec_hidden_dim,
                                                              tweet_features_dim, num_layers=num_rec_layers,
-                                                             dropout=rec_dropout)
+                                                             dropout=rec_dropout, use_gdelt=self.use_gdelt)
 
         self.hidden_dim = hidden_dim
 
@@ -24,7 +28,10 @@ class BotClassifier(nn.Module):
             nn.Linear(num_tweets_per_user * tweet_features_dim, tweet_features_dim)
         )
 
-        # does not account for the addition of general user data to the tensors
+        # account for the addition of general user data to the tensors
+        if self.use_gdelt:
+            tweet_features_dim += 1
+
         self.classifier = nn.Sequential(
             nn.BatchNorm1d(tweet_features_dim),
             nn.ReLU(),
@@ -55,9 +62,9 @@ class BotClassifier(nn.Module):
         users_tweets_features = self.tweets_combiner(users_tweets_features.view(len(inputs), -1))
 
         # TASK 3
-        # TODO add more data about each user
-        sims = calculate_similarity_wikidata(tweet_lists, important_topics, intense_indexes)
-        print(sims)
+        if self.use_gdelt:
+            sims = calculate_similarity_wikidata(tweet_lists, important_topics, intense_indexes)
+            users_tweets_features = torch.cat([users_tweets_features, torch.norm(torch.Tensor(sims)).unsqueeze(1)], 1)
 
         # TASK 4
         return self.classifier(users_tweets_features)
