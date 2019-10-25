@@ -248,7 +248,7 @@ class BlocksTrainer(Trainer):
         # ====== YOUR CODE: ======
         self.optimizer.zero_grad()
         # Forward pass
-        y_hat = self.model.forward(X)
+        y_hat = self.model.forward(*X)
         loss = self.loss_fn(y_hat, y)
 
         # Backward pass
@@ -268,7 +268,7 @@ class BlocksTrainer(Trainer):
 
         # ====== YOUR CODE: ======
         # Forward pass
-        y_hat = self.model.forward(X)
+        y_hat = self.model.forward(*X)
         loss = self.loss_fn(y_hat, y)
 
         # Calculate number of correct predictions
@@ -298,7 +298,7 @@ class TorchTrainer(Trainer):
         # ====== YOUR CODE: ======
         self.optimizer.zero_grad()
         # Forward pass
-        y_hat = self.model(X)
+        y_hat = self.model(*X)
         loss = self.loss_fn(y_hat, y)
 
         # Backward pass
@@ -327,7 +327,7 @@ class TorchTrainer(Trainer):
             # - Calculate number of correct predictions
             # ====== YOUR CODE: ======
             # Forward pass
-            y_hat = self.model(X)
+            y_hat = self.model(*X)
             loss = self.loss_fn(y_hat, y)
 
             # Calculate number of correct predictions

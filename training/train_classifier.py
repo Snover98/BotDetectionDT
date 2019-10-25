@@ -11,7 +11,7 @@ if __name__ == "__main__":
     num_epochs = 10
     loss_fn = nn.CrossEntropyLoss()
 
-    ds = UsersDataset(None)
+    ds = UsersDataset(it_flag=True)
     train_dl, test_dl = get_dataloaders(ds)
 
     w2v_model = Word2Vec.load("../checkpoints/word2vec.model")

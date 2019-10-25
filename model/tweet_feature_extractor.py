@@ -5,7 +5,7 @@ from typing import List, Tuple
 from data.user import Tweet
 from training.word_training import embed
 from data.utils import get_tweets_diffs
-from gdelt_utils.conn_gdelt import get_topics_in_dates
+from data.utils import intensity_indexes
 
 
 class TweetFeatureExtractor(nn.Module):
@@ -87,15 +87,14 @@ class TweetFeatureExtractor(nn.Module):
         recurrent_features_batch = used_recurrent_features.view(len(inputs), -1, self.hidden_dim)
 
         # TASK 6
-        # TODO add more info for each tweet
         # add tweets time diffrences
         diffs = get_tweets_diffs(inputs)
 
         # for user data
         if self.use_gdelt:
-            important_topics, intense_indexes = get_topics_in_dates(inputs, diffs, tweets_per_user)
+            intense_indexes = intensity_indexes(diffs, tweets_per_user)
         else:
-            important_topics, intense_indexes = None, None
+            intense_indexes = None
 
         diffs = torch.cat(diffs)
         diffs /= torch.max(diffs)
@@ -107,4 +106,4 @@ class TweetFeatureExtractor(nn.Module):
 
         # TASK 8
         return self.feature_extractor(recurrent_features_batch).view(len(inputs), -1,
-                                                                     self.output_dim), important_topics, intense_indexes
+                                                                     self.output_dim), intense_indexes

@@ -66,7 +66,7 @@ def calculate_similarity_wikidata(tweet_lists, topics, intense_indexes):
         start_pos, end_pos = intense_index
         if end_pos - start_pos > 5:
             end_pos = start_pos + 5
-        print(start_pos, end_pos)
+
         for tweet in user_tweets[start_pos: end_pos]:
             urls = tweet.entities["urls"]
 

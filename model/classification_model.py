@@ -42,7 +42,7 @@ class BotClassifier(nn.Module):
             nn.Softmax()
         )
 
-    def forward(self, inputs: List[User]):
+    def forward(self, inputs: List[User], important_topics):
         """
         TODO:
         1) use the tweet feature extractor on the users
@@ -54,7 +54,7 @@ class BotClassifier(nn.Module):
         # TASK 1
         tweet_lists = [user.tweets for user in inputs]
 
-        users_tweets_features, important_topics, intense_indexes = self.tweet_feature_extractor(
+        users_tweets_features, intense_indexes = self.tweet_feature_extractor(
             tweet_lists,
             [len(user.tweets) for user in inputs])
 
@@ -64,7 +64,9 @@ class BotClassifier(nn.Module):
         # TASK 3
         if self.use_gdelt:
             sims = calculate_similarity_wikidata(tweet_lists, important_topics, intense_indexes)
-            users_tweets_features = torch.cat([users_tweets_features, torch.norm(torch.Tensor(sims)).unsqueeze(1)], 1)
+            sims = torch.Tensor(sims).unsqueeze(1)
+            sims /= torch.max(sims)
+            users_tweets_features = torch.cat([users_tweets_features, sims], 1)
 
         # TASK 4
         return self.classifier(users_tweets_features)
