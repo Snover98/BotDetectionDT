@@ -53,6 +53,7 @@ class TweetFeatureExtractor(nn.Module):
 
         """
         # TASK 1
+        device = next(self.parameters()).device
         sequences = embed(self.word2vec_model, sum(inputs, []))
 
         sorted_indices, sorted_lengths = self.sorted_seq_by_len(sequences)
@@ -80,7 +81,8 @@ class TweetFeatureExtractor(nn.Module):
         for i, urf in enumerate(used_recurrent_features):
             dim0 = urf.shape[0]
             if dim0 != 100:
-                used_recurrent_features[i] = torch.cat([urf, torch.zeros(100 - dim0, self.hidden_dim)], 0)
+                used_recurrent_features[i] = torch.cat(
+                    [urf, torch.zeros(100 - dim0, self.hidden_dim, device=urf.device)], 0)
 
         used_recurrent_features = torch.cat(used_recurrent_features)
 
