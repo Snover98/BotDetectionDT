@@ -13,5 +13,6 @@ dependencies:
   - tqdm
   - matplotlib
 #  # all pip dependencies
-#  - pip:
+ - pip:
+     - astar-tcn --no-dependencies
 #      - gdelt

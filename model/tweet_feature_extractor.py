@@ -6,6 +6,7 @@ from data.user import Tweet
 from training.word_training import embed
 from data.utils import get_tweets_diffs
 from data.utils import intensity_indexes
+from TCN.tcn import TemporalConvNet
 
 
 class TweetFeatureExtractor(nn.Module):
@@ -25,7 +26,9 @@ class TweetFeatureExtractor(nn.Module):
         self.hidden_dim = hidden_dim
         self.output_dim = output_dim
         self.use_gdelt = use_gdelt
-        self.recurrent_extractor = nn.LSTM(embedding_dim, hidden_dim, num_layers, batch_first=True, dropout=dropout)
+
+        num_channels = [hidden_dim] * 4
+        self.recurrent_extractor = TemporalConvNet(embedding_dim, num_channels, 5, dropout)
 
         # at the moment this is without considering additional info about the tweets like the number of mentions, etc...
         # also the structure is arbitrary at the moment
@@ -62,12 +65,12 @@ class TweetFeatureExtractor(nn.Module):
         # TASK 2
         # DON'T FORGET TO USE PADDING AND PACKING FOR INPUT
         padded_seq_batch = pad_sequence(sequences, batch_first=True)
-        packed_seq_batch = pack_padded_sequence(padded_seq_batch[sorted_indices], sorted_lengths, batch_first=True)
+        padded_seq_batch = torch.stack([m.t() for m in padded_seq_batch[sorted_indices]])
 
         # TASK 3
         # DON'T FORGET TO UNDO THE PADDING AND PACKING FROM TASK 3
-        recurrent_features, _ = self.recurrent_extractor(packed_seq_batch)
-        recurrent_features, _ = pad_packed_sequence(recurrent_features, batch_first=True)
+        recurrent_features = self.recurrent_extractor(padded_seq_batch)
+        recurrent_features = torch.stack([m.t() for m in recurrent_features])
 
         # TASK 4
         seq_end_indices = [l - 1 for l in sorted_lengths]
