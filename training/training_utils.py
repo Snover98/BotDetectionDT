@@ -132,6 +132,7 @@ class Trainer(abc.ABC):
             else:
                 epochs_without_improvement += 1
                 if early_stopping is not None and epochs_without_improvement >= early_stopping:
+                    print("Stopped early.")
                     break
             # ========================
 
