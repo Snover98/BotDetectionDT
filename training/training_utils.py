@@ -128,7 +128,7 @@ class Trainer(abc.ABC):
             if best_acc is None or acc > best_acc:
                 best_acc = acc
                 if checkpoints is not None:
-                    torch.save(self.model.state_dict(), f"../checkpoints/{checkpoints}")
+                    torch.save(self.model.state_dict(), f"checkpoints/{checkpoints}")
             else:
                 epochs_without_improvement += 1
                 if early_stopping is not None and epochs_without_improvement >= early_stopping:
@@ -136,7 +136,7 @@ class Trainer(abc.ABC):
             # ========================
 
         if checkpoints is not None:
-            self.model.load_state_dict(torch.load(f"../checkpoints/{checkpoints}"))
+            self.model.load_state_dict(torch.load(f"checkpoints/{checkpoints}"))
 
         return FitResult(actual_num_epochs,
                          train_loss, train_acc, test_loss, test_acc)
@@ -210,30 +210,17 @@ class Trainer(abc.ABC):
                 num_batches = max_batches
                 num_samples = num_batches * dl.batch_size
 
-        if verbose:
-            pbar_file = sys.stdout
-        else:
-            pbar_file = open(os.devnull, 'w')
+        dl_iter = iter(dl)
+        for batch_idx in range(num_batches):
+            data = next(dl_iter)
+            batch_res = forward_fn(data)
 
-        pbar_name = forward_fn.__name__
-        with tqdm.tqdm(desc=pbar_name, total=num_batches,
-                       file=pbar_file) as pbar:
-            dl_iter = iter(dl)
-            for batch_idx in range(num_batches):
-                data = next(dl_iter)
-                batch_res = forward_fn(data)
+            losses.append(batch_res.loss)
+            num_correct += batch_res.num_correct
 
-                pbar.set_description(f'{pbar_name} ({batch_res.loss:.3f})')
-                pbar.update()
-
-                losses.append(batch_res.loss)
-                num_correct += batch_res.num_correct
-
-            avg_loss = sum(losses) / num_batches
-            accuracy = 100. * num_correct / num_samples
-            pbar.set_description(f'{pbar_name} '
-                                 f'(Avg. Loss {avg_loss:.3f}, '
-                                 f'Accuracy {accuracy:.1f})')
+        avg_loss = sum(losses) / num_batches
+        accuracy = 100. * num_correct / num_samples
+        print(f'{forward_fn.__name__} : (Avg. Loss {avg_loss:.3f}, Accuracy {accuracy:.1f})')
 
         return EpochResult(losses=losses, accuracy=accuracy)
 
@@ -299,6 +286,7 @@ class TorchTrainer(Trainer):
         self.optimizer.zero_grad()
         # Forward pass
         y_hat = self.model(*X)
+        y = y.to(y_hat.device)
         loss = self.loss_fn(y_hat, y)
 
         # Backward pass
@@ -328,6 +316,7 @@ class TorchTrainer(Trainer):
             # ====== YOUR CODE: ======
             # Forward pass
             y_hat = self.model(*X)
+            y = y.to(y_hat.device)
             loss = self.loss_fn(y_hat, y)
 
             # Calculate number of correct predictions

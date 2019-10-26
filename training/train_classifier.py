@@ -4,7 +4,7 @@ from torch.optim.adam import Adam
 from torch.optim.sgd import SGD
 from gensim.models import Word2Vec
 from model.classification_model import BotClassifier
-from training.training_utils import TorchTrainer, plot_fit
+from .training_utils import TorchTrainer, plot_fit
 from data.dataset import get_dataloaders, UsersDataset
 
 if __name__ == "__main__":
@@ -15,7 +15,7 @@ if __name__ == "__main__":
     train_dl, test_dl = get_dataloaders(ds)
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
-    w2v_model = Word2Vec.load("../checkpoints/word2vec.model")
+    w2v_model = Word2Vec.load("checkpoints/word2vec.model")
 
     clf = BotClassifier(w2v_model, 100, 1024, 128, 1024, use_gdelt=True).to(device)
     optim = Adam(params=clf.parameters(), lr=9e-4)

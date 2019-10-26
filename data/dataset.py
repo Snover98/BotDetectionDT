@@ -2,7 +2,7 @@ import pandas as pd
 import torch
 from torch.utils import data
 from torch.utils.data import Dataset
-import data.conn as c
+from .conn import connect
 from data.user import User
 from data.create_db_to_rnn import is_eng
 import pickle
@@ -16,7 +16,7 @@ import datetime
 def get_users(df: pd.DataFrame):
     ids = df['ID']
     labels = df['Class']
-    api = c.connect()
+    api = connect()
     users = []
     classes = []
     for id, label in zip(ids, labels):
@@ -48,12 +48,12 @@ class UsersDataset(Dataset):
             self.users, self.labels = get_users(self.users_frame)
 
             to_save = (self.users, self.labels)
-            file = open("../data/users.pickle", 'wb')
+            file = open("data/users.pickle", 'wb')
             pickle.dump(to_save, file)
             file.close()
 
         else:
-            file = open("../data/users.pickle", 'rb')
+            file = open("data/users.pickle", 'rb')
             to_save = pickle.load(file)
             self.users, self.labels = to_save
             file.close()
@@ -146,7 +146,7 @@ def save_important_topics():
 
 
 def get_it():
-    with open('../data/listfile.txt', 'r') as filehandle:
+    with open('data/listfile.txt', 'r') as filehandle:
         important_topics = json.load(filehandle)
     return important_topics
 

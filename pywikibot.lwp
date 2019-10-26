@@ -1,0 +1,9 @@
+#LWP-Cookies-2.0
+Set-Cookie3: WMF-Last-Access-Global="26-Oct-2019"; path="/"; domain=".wikidata.org"; path_spec; domain_dot; secure; expires="2019-11-27 00:00:00Z"; HttpOnly=None; version=0
+Set-Cookie3: WMF-Last-Access="26-Oct-2019"; path="/"; domain="www.wikidata.org"; path_spec; secure; expires="2019-11-27 00:00:00Z"; HttpOnly=None; version=0
+Set-Cookie3: centralauth_Token=97870c66791cf99312a4e6a089d18083; path="/"; domain="www.wikidata.org"; path_spec; secure; expires="2020-10-25 09:24:27Z"; HttpOnly=None; version=0
+Set-Cookie3: centralauth_User=Benbanuz; path="/"; domain="www.wikidata.org"; path_spec; secure; expires="2020-10-25 09:24:27Z"; HttpOnly=None; version=0
+Set-Cookie3: forceHTTPS=true; path="/"; domain="www.wikidata.org"; path_spec; expires="2019-11-25 09:24:27Z"; HttpOnly=None; version=0
+Set-Cookie3: loginnotify_prevlogins="2019-1yusl2d-sp7nbe92z7nfjq0lfg2cakmni6jpg8l"; path="/"; domain="www.wikidata.org"; path_spec; secure; expires="2020-04-23 09:24:27Z"; HttpOnly=None; version=0
+Set-Cookie3: wikidatawikiUserID=3650771; path="/"; domain="www.wikidata.org"; path_spec; secure; expires="2020-10-25 09:24:27Z"; HttpOnly=None; version=0
+Set-Cookie3: wikidatawikiUserName=Benbanuz; path="/"; domain="www.wikidata.org"; path_spec; secure; expires="2020-10-25 09:24:27Z"; HttpOnly=None; version=0

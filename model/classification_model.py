@@ -1,4 +1,4 @@
-from model.tweet_feature_extractor import TweetFeatureExtractor
+from .tweet_feature_extractor import TweetFeatureExtractor
 from data.user import User
 import torch
 from torch import nn
@@ -64,7 +64,7 @@ class BotClassifier(nn.Module):
         # TASK 3
         if self.use_gdelt:
             sims = calculate_similarity_wikidata(tweet_lists, important_topics, intense_indexes)
-            sims = torch.Tensor(sims, device=users_tweets_features.device).unsqueeze(1)
+            sims = torch.Tensor(sims).to(users_tweets_features.device).unsqueeze(1)
             sims /= torch.max(sims)
             users_tweets_features = torch.cat([users_tweets_features, sims], 1)
 
