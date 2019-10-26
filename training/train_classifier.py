@@ -15,7 +15,7 @@ if __name__ == "__main__":
     train_dl, test_dl = get_dataloaders(ds)
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
-    w2v_model = Word2Vec.load("../checkpoints/word2vec.model")
+    w2v_model = Word2Vec.load("checkpoints/word2vec.model")
 
     clf = BotClassifier(w2v_model, 100, 1024, 128, 1024, use_gdelt=True).to(device)
     optim = Adam(params=clf.parameters(), lr=9e-4)

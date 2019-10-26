@@ -54,7 +54,7 @@ class TweetFeatureExtractor(nn.Module):
         """
         # TASK 1
         device = next(self.parameters()).device
-        sequences = embed(self.word2vec_model, sum(inputs, []))
+        sequences = embed(self.word2vec_model, sum(inputs, []), device)
 
         sorted_indices, sorted_lengths = self.sorted_seq_by_len(sequences)
         num_tweets = len(sorted_indices)

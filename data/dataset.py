@@ -48,12 +48,12 @@ class UsersDataset(Dataset):
             self.users, self.labels = get_users(self.users_frame)
 
             to_save = (self.users, self.labels)
-            file = open("../data/users.pickle", 'wb')
+            file = open("data/users.pickle", 'wb')
             pickle.dump(to_save, file)
             file.close()
 
         else:
-            file = open("../data/users.pickle", 'rb')
+            file = open("data/users.pickle", 'rb')
             to_save = pickle.load(file)
             self.users, self.labels = to_save
             file.close()
@@ -146,7 +146,7 @@ def save_important_topics():
 
 
 def get_it():
-    with open('../data/listfile.txt', 'r') as filehandle:
+    with open('data/listfile.txt', 'r') as filehandle:
         important_topics = json.load(filehandle)
     return important_topics
 
