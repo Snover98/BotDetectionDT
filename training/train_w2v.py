@@ -1,4 +1,4 @@
-from training.word_training import train_wtv_on_tweets
+from .word_training import train_wtv_on_tweets
 from data.dataset import UsersDataset
 
 if __name__ == "__main__":
