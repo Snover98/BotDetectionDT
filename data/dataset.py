@@ -2,7 +2,7 @@ import pandas as pd
 import torch
 from torch.utils import data
 from torch.utils.data import Dataset
-import data.conn as c
+from .conn import connect
 from data.user import User
 from data.create_db_to_rnn import is_eng
 import pickle
@@ -16,7 +16,7 @@ import datetime
 def get_users(df: pd.DataFrame):
     ids = df['ID']
     labels = df['Class']
-    api = c.connect()
+    api = connect()
     users = []
     classes = []
     for id, label in zip(ids, labels):
