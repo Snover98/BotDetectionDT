@@ -299,6 +299,7 @@ class TorchTrainer(Trainer):
         self.optimizer.zero_grad()
         # Forward pass
         y_hat = self.model(*X)
+        y = y.to(y_hat.device)
         loss = self.loss_fn(y_hat, y)
 
         # Backward pass
@@ -328,6 +329,7 @@ class TorchTrainer(Trainer):
             # ====== YOUR CODE: ======
             # Forward pass
             y_hat = self.model(*X)
+            y = y.to(y_hat.device)
             loss = self.loss_fn(y_hat, y)
 
             # Calculate number of correct predictions
