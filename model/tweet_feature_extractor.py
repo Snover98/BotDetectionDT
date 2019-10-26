@@ -90,7 +90,7 @@ class TweetFeatureExtractor(nn.Module):
 
         # TASK 6
         # add tweets time diffrences
-        diffs = get_tweets_diffs(inputs, device)
+        diffs = get_tweets_diffs(inputs)
 
         # for user data
         if self.use_gdelt:
@@ -98,7 +98,7 @@ class TweetFeatureExtractor(nn.Module):
         else:
             intense_indexes = None
 
-        diffs = torch.cat(diffs)
+        diffs = torch.cat(diffs).to(device)
         diffs /= torch.max(diffs)
         diffs = diffs.unsqueeze(1)
 
