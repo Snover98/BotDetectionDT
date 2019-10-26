@@ -38,9 +38,7 @@ def wiki_connect():
     return site, repo, token
 
 
-def get_info(items: list):
-    site, repo, token = wiki_connect()
-
+def get_info(site, repo, token, items: list):
     output = []
     for item in items:
         item_output = ""
@@ -58,7 +56,7 @@ def get_info(items: list):
 
 def calculate_similarity_wikidata(tweet_lists, topics, intense_indexes):
     similarity = []
-
+    site, repo, token = wiki_connect()
     for user_tweets, user_topics, intense_index in zip(tweet_lists, topics, intense_indexes):
         all_user_words = []
         sim = 0
@@ -80,7 +78,7 @@ def calculate_similarity_wikidata(tweet_lists, topics, intense_indexes):
             word_list = [word for word in word_list if word not in stopwords.words('english')]
             all_user_words += word_list
 
-        wikidata_expension = get_info(all_user_words) + all_user_words
+        wikidata_expension = get_info(site, repo, token, all_user_words) + all_user_words
 
         for topic in user_topics:
             for word in wikidata_expension:
