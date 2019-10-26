@@ -59,25 +59,24 @@ class TweetFeatureExtractor(nn.Module):
         sorted_indices, sorted_lengths = self.sorted_seq_by_len(sequences)
         num_tweets = len(sorted_indices)
 
-        # # TASK 2
-        # # DON'T FORGET TO USE PADDING AND PACKING FOR INPUT
-        # padded_seq_batch = pad_sequence(sequences, batch_first=True)
-        # packed_seq_batch = pack_padded_sequence(padded_seq_batch[sorted_indices], sorted_lengths, batch_first=True)
-        #
-        # # TASK 3
-        # # DON'T FORGET TO UNDO THE PADDING AND PACKING FROM TASK 3
-        # recurrent_features, _ = self.recurrent_extractor(packed_seq_batch)
-        # recurrent_features, _ = pad_packed_sequence(recurrent_features, batch_first=True)
-        #
-        # # TASK 4
-        # seq_end_indices = [l - 1 for l in sorted_lengths]
-        # used_recurrent_features = recurrent_features[range(num_tweets), seq_end_indices]
-        # # also reorder the tweets back
-        # used_recurrent_features = used_recurrent_features[sorted_indices]
-        #
-        # # TASK 5
-        # used_recurrent_features = list(torch.split(used_recurrent_features, tweets_per_user))
-        used_recurrent_features = torch.randn(num_tweets, self.embedding_dim)
+        # TASK 2
+        # DON'T FORGET TO USE PADDING AND PACKING FOR INPUT
+        padded_seq_batch = pad_sequence(sequences, batch_first=True)
+        packed_seq_batch = pack_padded_sequence(padded_seq_batch[sorted_indices], sorted_lengths, batch_first=True)
+
+        # TASK 3
+        # DON'T FORGET TO UNDO THE PADDING AND PACKING FROM TASK 3
+        recurrent_features, _ = self.recurrent_extractor(packed_seq_batch)
+        recurrent_features, _ = pad_packed_sequence(recurrent_features, batch_first=True)
+
+        # TASK 4
+        seq_end_indices = [l - 1 for l in sorted_lengths]
+        used_recurrent_features = recurrent_features[range(num_tweets), seq_end_indices]
+        # also reorder the tweets back
+        used_recurrent_features = used_recurrent_features[sorted_indices]
+
+        # TASK 5
+        used_recurrent_features = list(torch.split(used_recurrent_features, tweets_per_user))
 
         for i, urf in enumerate(used_recurrent_features):
             dim0 = urf.shape[0]
