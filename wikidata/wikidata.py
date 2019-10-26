@@ -54,6 +54,11 @@ def get_info(site, repo, token, items: list):
     return output
 
 
+def wordListToFreqDict(topics, words):
+    wordfreq = [words.count(topic) for topic in topics]
+    return sum(wordfreq)
+
+
 def calculate_similarity_wikidata(tweet_lists, topics, intense_indexes):
     similarity = []
     site, repo, token = wiki_connect()
@@ -80,9 +85,7 @@ def calculate_similarity_wikidata(tweet_lists, topics, intense_indexes):
 
         wikidata_expension = get_info(site, repo, token, all_user_words) + all_user_words
 
-        for topic in user_topics:
-            for word in wikidata_expension:
-                sim += similar(topic, word)
+        sim = wordListToFreqDict(user_topics, wikidata_expension)
 
         similarity.append(sim)
 
