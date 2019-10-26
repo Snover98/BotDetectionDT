@@ -2,7 +2,7 @@ import torch
 import numpy as np
 
 
-def get_tweets_diffs(inputs):
+def get_tweets_diffs(inputs, device):
     diffs = []
     for i, user in enumerate(inputs):
         diffs.append([0])
@@ -12,9 +12,9 @@ def get_tweets_diffs(inputs):
                 diff = former_date - tweet.date
                 diffs[i].append(diff.days)
                 former_date = tweet.date
-        diffs[i] = torch.Tensor(diffs[i])
+        diffs[i] = torch.Tensor(diffs[i]).to(device)
         if diffs[i].shape[0] < 100:
-            diffs[i] = torch.cat([diffs[i], torch.zeros(100 - diffs[i].shape[0])])
+            diffs[i] = torch.cat([diffs[i], torch.zeros(100 - diffs[i].shape[0], device=device)])
     return diffs
 
 

@@ -90,7 +90,7 @@ class TweetFeatureExtractor(nn.Module):
 
         # TASK 6
         # add tweets time diffrences
-        diffs = get_tweets_diffs(inputs)
+        diffs = get_tweets_diffs(inputs, device)
 
         # for user data
         if self.use_gdelt:
