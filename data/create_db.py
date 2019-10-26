@@ -1,7 +1,7 @@
 import sqlite3
 from sqlite3 import Error
-from .user import User
-from .create_db_to_rnn import get_users
+from data.user import User
+from data.create_db_to_rnn import get_users
 import pandas as pd
 
 

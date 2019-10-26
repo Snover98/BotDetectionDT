@@ -4,7 +4,7 @@ from torch.optim.adam import Adam
 from torch.optim.sgd import SGD
 from gensim.models import Word2Vec
 from model.classification_model import BotClassifier
-from .training_utils import TorchTrainer, plot_fit
+from training.training_utils import TorchTrainer, plot_fit
 from data.dataset import get_dataloaders, UsersDataset
 
 if __name__ == "__main__":

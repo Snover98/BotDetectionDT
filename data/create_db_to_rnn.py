@@ -1,6 +1,6 @@
 from data.user import User
 import pandas as pd
-from .conn import connect
+import data.conn as c
 from langdetect import detect
 
 
@@ -11,7 +11,7 @@ def is_eng(tweet):
 def get_users():
     df = pd.read_csv("db/varol-2017.csv")
     ids = df['ID']
-    api = connect()
+    api = c.connect()
     users = []
     bad_user = []
     for id in ids:

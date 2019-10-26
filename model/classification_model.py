@@ -1,4 +1,4 @@
-from .tweet_feature_extractor import TweetFeatureExtractor
+from model.tweet_feature_extractor import TweetFeatureExtractor
 from data.user import User
 import torch
 from torch import nn
