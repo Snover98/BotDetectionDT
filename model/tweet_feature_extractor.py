@@ -27,8 +27,8 @@ class TweetFeatureExtractor(nn.Module):
         self.output_dim = output_dim
         self.use_gdelt = use_gdelt
 
-        num_channels = [hidden_dim] * 4
-        self.recurrent_extractor = TemporalConvNet(embedding_dim, num_channels, 5, dropout)
+        num_channels = [hidden_dim] * 3
+        self.recurrent_extractor = TemporalConvNet(embedding_dim, num_channels, 7, dropout)
 
         # at the moment this is without considering additional info about the tweets like the number of mentions, etc...
         # also the structure is arbitrary at the moment
