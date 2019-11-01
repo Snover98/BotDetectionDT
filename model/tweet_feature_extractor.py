@@ -89,8 +89,7 @@ class TweetFeatureExtractor(nn.Module):
         seq_end_indices = [l - 1 for l in sorted_lengths]
         used_recurrent_features = recurrent_features[range(num_tweets), seq_end_indices]
         # also reorder the tweets back
-        if not self.use_TCN:
-            used_recurrent_features = used_recurrent_features[sorted_indices]
+        used_recurrent_features = used_recurrent_features[sorted_indices]
 
         # TASK 5
         used_recurrent_features = list(torch.split(used_recurrent_features, tweets_per_user))
