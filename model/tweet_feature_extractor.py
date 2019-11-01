@@ -65,7 +65,7 @@ class TweetFeatureExtractor(nn.Module):
         """
         # TASK 1
         device = next(self.parameters()).device
-        sequences = embed(self.word2vec_model, sum(inputs, []), device, self.use_TCN)
+        sequences = embed(self.word2vec_model, sum(inputs, []), device)
 
         sorted_indices, sorted_lengths = self.sorted_seq_by_len(sequences)
         num_tweets = len(sorted_indices)
@@ -73,9 +73,10 @@ class TweetFeatureExtractor(nn.Module):
         # TASK 2
         # DON'T FORGET TO USE PADDING AND PACKING FOR INPUT
         padded_seq_batch = pad_sequence(sequences, batch_first=True)
-        if not self.use_TCN:
+        if self.use_TCN:
+            padded_seq_batch = torch.stack([m.t() for m in padded_seq_batch[sorted_indices]])
+        else:
             packed_seq_batch = pack_padded_sequence(padded_seq_batch[sorted_indices], sorted_lengths, batch_first=True)
-
         # TASK 3
         # DON'T FORGET TO UNDO THE PADDING AND PACKING FROM TASK 3
         if self.use_TCN:

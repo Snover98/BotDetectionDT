@@ -55,7 +55,7 @@ def train_wtv_on_tweets(users, num_epochs=5):
     return model
 
 
-def embed(model: Word2Vec, tweets: List, device, transpose_tensors=False):
+def embed(model: Word2Vec, tweets: List, device):
     seq_list = []
     for tweet in tweets:
         urls = tweet.entities["urls"]
@@ -68,9 +68,7 @@ def embed(model: Word2Vec, tweets: List, device, transpose_tensors=False):
 
         word_list = w2v_pre_process(tweet.text, mentions, urls)
 
-        if transpose_tensors:
-            seq_list.append(torch.stack([torch.from_numpy(model.wv.word_vec(word)).to(device).t() for word in word_list]))
-        else:
-            seq_list.append(torch.stack([torch.from_numpy(model.wv.word_vec(word)).to(device) for word in word_list]))
+        seq_list.append(torch.stack([torch.from_numpy(model.wv.word_vec(word)).to(device) for word in word_list]))
+
 
     return seq_list
