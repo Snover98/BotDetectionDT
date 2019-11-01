@@ -15,4 +15,6 @@ dependencies:
 #  # all pip dependencies
  - pip:
      - astar-tcn --no-dependencies
-#      - gdelt
+     - nltk
+     - pywikibot
+     - langdetect
