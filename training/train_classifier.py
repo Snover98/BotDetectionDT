@@ -1,4 +1,5 @@
 import sys
+
 sys.path.append('../')
 import torch
 from torch import nn
@@ -63,7 +64,7 @@ def main(args):
     loss_fn = nn.CrossEntropyLoss()
 
     ds = UsersDataset(it_flag=True)
-    train_dl, test_dl = get_dataloaders(ds)
+    train_dl, test_dl = get_dataloaders(ds, batch_size=args.batch_size)
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
     w2v_model = Word2Vec.load("../checkpoints/word2vec.model")
