@@ -7,16 +7,18 @@ from wikidata.wikidata import calculate_similarity_wikidata
 
 
 class BotClassifier(nn.Module):
-    def __init__(self, word2vec_model, embedding_dim, rec_hidden_dim, tweet_features_dim, hidden_dim, use_gdelt=False,
-                 num_rec_layers=1,
-                 rec_dropout=0):
+    def __init__(self, word2vec_model, embedding_dim, rec_hidden_dim, tweet_features_dim, hidden_dim,
+                 use_gdelt=False, use_TCN=False,
+                 effective_history=91,
+                 num_rec_layers=1, rec_dropout=0):
         super().__init__()
 
         self.use_gdelt = use_gdelt
 
         self.tweet_feature_extractor = TweetFeatureExtractor(word2vec_model, embedding_dim, rec_hidden_dim,
                                                              tweet_features_dim, num_layers=num_rec_layers,
-                                                             dropout=rec_dropout, use_gdelt=self.use_gdelt)
+                                                             dropout=rec_dropout, use_gdelt=self.use_gdelt,
+                                                             use_TCN=use_TCN, effective_history=effective_history)
 
         self.hidden_dim = hidden_dim
 

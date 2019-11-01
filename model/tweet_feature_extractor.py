@@ -10,7 +10,8 @@ from TCN.tcn import TemporalConvNet
 
 
 class TweetFeatureExtractor(nn.Module):
-    def __init__(self, word2vec_model, embedding_dim, hidden_dim, output_dim, num_layers=1, dropout=0, use_gdelt=False):
+    def __init__(self, word2vec_model, embedding_dim, hidden_dim, output_dim, num_layers=1, dropout=0.2, use_gdelt=False,
+                 use_TCN=False, effective_history=91):
         """
 
         :param word2vec_model: the actual model that would embed the tweets
@@ -27,8 +28,17 @@ class TweetFeatureExtractor(nn.Module):
         self.output_dim = output_dim
         self.use_gdelt = use_gdelt
 
-        num_channels = [hidden_dim] * 4
-        self.recurrent_extractor = TemporalConvNet(embedding_dim, num_channels, 4, dropout)
+        self.use_TCN = use_TCN
+
+        if use_TCN:
+            # TODO: add get_params_from_effective_history function
+            # kernel_size, num_levels = get_params_from_effective_history(effective_history)
+            num_levels = 4
+            kernel_size = 4
+            num_channels = [hidden_dim] * num_levels
+            self.temporal_extractor = TemporalConvNet(embedding_dim, num_channels, kernel_size, dropout)
+        else:
+            self.temporal_extractor = nn.LSTM(embedding_dim, hidden_dim, num_layers, batch_first=True, dropout=dropout)
 
         # at the moment this is without considering additional info about the tweets like the number of mentions, etc...
         # also the structure is arbitrary at the moment
@@ -57,7 +67,7 @@ class TweetFeatureExtractor(nn.Module):
         """
         # TASK 1
         device = next(self.parameters()).device
-        sequences = embed(self.word2vec_model, sum(inputs, []), device)
+        sequences = embed(self.word2vec_model, sum(inputs, []), device, self.use_TCN)
 
         sorted_indices, sorted_lengths = self.sorted_seq_by_len(sequences)
         num_tweets = len(sorted_indices)
@@ -65,18 +75,23 @@ class TweetFeatureExtractor(nn.Module):
         # TASK 2
         # DON'T FORGET TO USE PADDING AND PACKING FOR INPUT
         padded_seq_batch = pad_sequence(sequences, batch_first=True)
-        padded_seq_batch = torch.stack([m.t() for m in padded_seq_batch[sorted_indices]])
+        if not self.use_TCN:
+            packed_seq_batch = pack_padded_sequence(padded_seq_batch[sorted_indices], sorted_lengths, batch_first=True)
 
         # TASK 3
         # DON'T FORGET TO UNDO THE PADDING AND PACKING FROM TASK 3
-        recurrent_features = self.recurrent_extractor(padded_seq_batch)
-        recurrent_features = torch.stack([m.t() for m in recurrent_features])
+        if self.use_TCN:
+            recurrent_features = torch.stack([m.t() for m in self.temporal_extractor(padded_seq_batch)])
+        else:
+            recurrent_features, _ = self.temporal_extractor(packed_seq_batch)
+            recurrent_features, _ = pad_packed_sequence(recurrent_features, batch_first=True)
 
         # TASK 4
         seq_end_indices = [l - 1 for l in sorted_lengths]
         used_recurrent_features = recurrent_features[range(num_tweets), seq_end_indices]
         # also reorder the tweets back
-        used_recurrent_features = used_recurrent_features[sorted_indices]
+        if not self.use_TCN:
+            used_recurrent_features = used_recurrent_features[sorted_indices]
 
         # TASK 5
         used_recurrent_features = list(torch.split(used_recurrent_features, tweets_per_user))
