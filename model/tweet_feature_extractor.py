@@ -6,6 +6,7 @@ from data.user import Tweet
 from training.word_training import embed
 from data.utils import get_tweets_diffs
 from data.utils import intensity_indexes
+from .utils import get_TCN_params_from_effective_history
 from TCN.tcn import TemporalConvNet
 
 
@@ -31,10 +32,7 @@ class TweetFeatureExtractor(nn.Module):
         self.use_TCN = use_TCN
 
         if use_TCN:
-            # TODO: add get_params_from_effective_history function
-            # kernel_size, num_levels = get_params_from_effective_history(effective_history)
-            num_levels = 4
-            kernel_size = 4
+            num_levels, kernel_size = get_TCN_params_from_effective_history(effective_history)
             num_channels = [hidden_dim] * num_levels
             self.temporal_extractor = TemporalConvNet(embedding_dim, num_channels, kernel_size, dropout)
         else:
