@@ -1,12 +1,13 @@
+import sys
+sys.path.append('../')
 import torch
 from torch import nn
 from torch.optim.adam import Adam
 from torch.optim.sgd import SGD
 from gensim.models import Word2Vec
 import argparse
-
 from model.classification_model import BotClassifier
-from .training_utils import TorchTrainer, plot_fit
+from training.training_utils import TorchTrainer, plot_fit
 from data.dataset import get_dataloaders, UsersDataset
 
 
@@ -29,7 +30,7 @@ def parse_arguments():
                             By default there is no early stopping.""")
     parser.add_argument('-l', '--learning_rate', dest='learning_rate', type=float, default=9e-4,
                         help='The learning rate for the classifier.')
-    parser.add_argument('-w', '--weight_decay', dest='learning_rate', type=float, default=0,
+    parser.add_argument('-w', '--weight_decay', dest='weight_decay', type=float, default=0,
                         help='The L2 regularisation coefficient. default=0.')
     parser.add_argument('--use_SGD', dest='use_SGD', action='store_true', default=False,
                         help="A flag that's used if we want to use SGD as our optimiser instead of ADAM.")
@@ -65,7 +66,7 @@ def main(args):
     train_dl, test_dl = get_dataloaders(ds)
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
-    w2v_model = Word2Vec.load("checkpoints/word2vec.model")
+    w2v_model = Word2Vec.load("../checkpoints/word2vec.model")
 
     clf = BotClassifier(w2v_model, args.embedding_dim, args.rec_hidden_dim, args.tweet_features_dim, args.hidden_dim,
                         use_gdelt=args.use_gdelt, use_TCN=args.use_TCN, effective_history=args.effective_history,
