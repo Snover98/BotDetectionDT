@@ -29,7 +29,7 @@ def parse_arguments():
                             By default there is no early stopping.""")
     parser.add_argument('-l', '--learning_rate', dest='learning_rate', type=float, default=9e-4,
                         help='The learning rate for the classifier.')
-    parser.add_argument('-w', '--weight_decay', dest='learning_rate', type=float, default=0,
+    parser.add_argument('-w', '--weight_decay', dest='weight_decay', type=float, default=0,
                         help='The L2 regularisation coefficient. default=0.')
     parser.add_argument('--use_SGD', dest='use_SGD', action='store_true', default=False,
                         help="A flag that's used if we want to use SGD as our optimiser instead of ADAM.")
