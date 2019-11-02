@@ -21,7 +21,7 @@ def get_tweets_avg_diffs(inputs):
             diffs.append(torch.Tensor(
                 [(tweet2.date - tweet1.date).seconds for tweet1, tweet2 in zip(user, user[1:])]).mean().unsqueeze(0))
         else:
-            diffs.append(torch.Tensor([0.0]).unsqueeze(0))
+            diffs.append(torch.Tensor([0.0]))
     return torch.cat(diffs)
 
 
