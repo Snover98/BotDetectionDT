@@ -115,7 +115,6 @@ class TweetFeatureExtractor(nn.Module):
             intense_indexes = None
 
         diffs = torch.cat(diffs).to(device)
-        diffs /= torch.max(diffs)
         diffs = diffs.unsqueeze(1)
 
         # TASK 7
