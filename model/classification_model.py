@@ -4,6 +4,8 @@ import torch
 from torch import nn
 from typing import List
 from wikidata.wikidata import calculate_similarity_wikidata
+from data.utils import get_tweets_avg_diffs, get_tweets_diffs
+from data.utils import intensity_indexes
 
 
 class BotClassifier(nn.Module):
@@ -20,27 +22,28 @@ class BotClassifier(nn.Module):
                                                              dropout=rec_dropout, use_gdelt=self.use_gdelt,
                                                              use_TCN=use_TCN, effective_history=effective_history)
 
+        num_handmade_features = 3
         self.hidden_dim = hidden_dim
 
-        num_tweets_per_user = 100
+        self.num_tweets_per_user = 100
 
         self.tweets_combiner = nn.Sequential(
-            nn.BatchNorm1d(num_tweets_per_user * tweet_features_dim),
+            nn.BatchNorm1d(self.num_tweets_per_user * tweet_features_dim),
             nn.ReLU(),
-            nn.Linear(num_tweets_per_user * tweet_features_dim, tweet_features_dim)
+            nn.Linear(self.num_tweets_per_user * tweet_features_dim, tweet_features_dim)
         )
+
+        tweet_features_dim += num_handmade_features
 
         # account for the addition of general user data to the tensors
         if self.use_gdelt:
             tweet_features_dim += 1
-
 
         self.feature_extractor = nn.Sequential(
             nn.BatchNorm1d(tweet_features_dim),
             nn.ReLU(),
             nn.Linear(tweet_features_dim, hidden_dim)
         )
-
 
         self.classifier = nn.Sequential(
             nn.BatchNorm1d(hidden_dim),
@@ -57,23 +60,35 @@ class BotClassifier(nn.Module):
         3) add some more general user data to the batch (for each user)
         4) classify using these features
         """
+        handmade_features = []
 
         # TASK 1
         tweet_lists = [user.tweets for user in inputs]
+        device = next(self.parameters()).device
 
-        users_tweets_features, intense_indexes = self.tweet_feature_extractor(
-            tweet_lists,
-            [len(user.tweets) for user in inputs])
+        users_tweets_features = self.tweet_feature_extractor(tweet_lists, [len(user.tweets) for user in inputs])
 
         # TASK 2
         users_tweets_features = self.tweets_combiner(users_tweets_features.view(len(inputs), -1))
 
+        # for user data
+        if self.use_gdelt:
+            intense_indexes = intensity_indexes(get_tweets_diffs(tweet_lists), [len(user.tweets) for user in inputs])
+        else:
+            intense_indexes = None
+
+        diffs = get_tweets_avg_diffs(tweet_lists)
+        handmade_features.append(diffs.to(device).unsqueeze(1))
+
         # TASK 3
         if self.use_gdelt:
             sims = calculate_similarity_wikidata(tweet_lists, important_topics, intense_indexes)
-            sims = torch.Tensor(sims).to(users_tweets_features.device).unsqueeze(1)
-            users_tweets_features = torch.cat([users_tweets_features, sims], 1)
+            handmade_features.append(torch.Tensor(sims).to(device).unsqueeze(1))
+
+        handmade_features.append(torch.Tensor([user.followers_count for user in inputs]).to(device).unsqueeze(1))
+        handmade_features.append(torch.Tensor([user.friends_count for user in inputs]).to(device).unsqueeze(1))
 
         # TASK 4
+        users_tweets_features = torch.cat((users_tweets_features, *handmade_features), dim=1)
         features = self.feature_extractor(users_tweets_features)
         return self.classifier(features)

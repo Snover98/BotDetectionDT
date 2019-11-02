@@ -48,12 +48,12 @@ class UsersDataset(Dataset):
             self.users, self.labels = get_users(self.users_frame)
 
             to_save = (self.users, self.labels)
-            file = open("../data/users.pickle", 'wb')
+            file = open("data/users.pickle", 'wb')
             pickle.dump(to_save, file)
             file.close()
 
         else:
-            file = open("../data/users.pickle", 'rb')
+            file = open("data/users.pickle", 'rb')
             to_save = pickle.load(file)
             self.users, self.labels = to_save
             file.close()
@@ -99,12 +99,12 @@ def second_date_format(file):
 
 def save_important_topics():
     # Get the GDELT field names from a helper file
-    colnames = pd.read_excel('../CSV.header.fieldids.xlsx', sheetname='Sheet1',
+    colnames = pd.read_excel('CSV.header.fieldids.xlsx', sheetname='Sheet1',
                              index_col='Column ID', parse_cols=1)['Field Name']
 
     us_db = UsersDataset()
     users = us_db.users
-    files = glob.glob("../db/Gdelttmp/*")
+    files = glob.glob("db/Gdelttmp/*")
     tweets = [user.tweets for user in users]
     tweets_per_user = [len(user.tweets) for user in users]
     diffs = get_tweets_diffs(tweets)
@@ -146,7 +146,7 @@ def save_important_topics():
 
 
 def get_it():
-    with open('../data/listfile.txt', 'r') as filehandle:
+    with open('data/listfile.txt', 'r') as filehandle:
         important_topics = json.load(filehandle)
     return important_topics
 

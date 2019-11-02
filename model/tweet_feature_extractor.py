@@ -4,14 +4,13 @@ from torch.nn.utils.rnn import pad_sequence, pack_padded_sequence, pad_packed_se
 from typing import List, Tuple
 from data.user import Tweet
 from training.word_training import embed
-from data.utils import get_tweets_diffs
-from data.utils import intensity_indexes
 from .utils import get_TCN_params_from_effective_history
 from TCN.tcn import TemporalConvNet
 
 
 class TweetFeatureExtractor(nn.Module):
-    def __init__(self, word2vec_model, embedding_dim, hidden_dim, output_dim, num_layers=1, dropout=0.2, use_gdelt=False,
+    def __init__(self, word2vec_model, embedding_dim, hidden_dim, output_dim, num_layers=1, dropout=0.2,
+                 use_gdelt=False,
                  use_TCN=False, effective_history=91):
         """
 
@@ -40,7 +39,8 @@ class TweetFeatureExtractor(nn.Module):
 
         # at the moment this is without considering additional info about the tweets like the number of mentions, etc...
         # also the structure is arbitrary at the moment
-        self.feature_extractor = nn.Linear(hidden_dim + 1, output_dim)
+        self.num_handmade_features = 4
+        self.feature_extractor = nn.Linear(hidden_dim + self.num_handmade_features, output_dim)
 
     @staticmethod
     def sorted_seq_by_len(sequences) -> Tuple[List[int], List[int]]:
@@ -63,6 +63,8 @@ class TweetFeatureExtractor(nn.Module):
         8) feed these these tensors into the linear feature extractor and return it's output
 
         """
+        handmade_features = []
+
         # TASK 1
         device = next(self.parameters()).device
         sequences = embed(self.word2vec_model, sum(inputs, []), device)
@@ -91,6 +93,23 @@ class TweetFeatureExtractor(nn.Module):
         # also reorder the tweets back
         used_recurrent_features = used_recurrent_features[sorted_indices]
 
+        # ADD HANDMADE FEATURES
+        # favorite count
+        handmade_features.append(
+            torch.Tensor([tweet.favorite_count for tweet in sum(inputs, [])]).to(device).unsqueeze(1))
+        # is the tweet a quote?
+        handmade_features.append(torch.Tensor([tweet.is_quote for tweet in sum(inputs, [])]).to(device).unsqueeze(1))
+        # whether or not there is a retweeted status
+        handmade_features.append(
+            torch.Tensor([tweet.retweeted_status is None for tweet in sum(inputs, [])]).to(device).unsqueeze(1))
+        # the number of entities in the tweet
+        handmade_features.append(
+            torch.Tensor([sum([len(entity) for entity in tweet.entities.values()]) for tweet in sum(inputs, [])]).to(
+                device).unsqueeze(1))
+
+        features_dim = self.hidden_dim + self.num_handmade_features
+        used_recurrent_features = torch.cat((used_recurrent_features, *handmade_features), dim=1)
+
         # TASK 5
         used_recurrent_features = list(torch.split(used_recurrent_features, tweets_per_user))
 
@@ -98,29 +117,14 @@ class TweetFeatureExtractor(nn.Module):
             dim0 = urf.shape[0]
             if dim0 != 100:
                 used_recurrent_features[i] = torch.cat(
-                    [urf, torch.zeros(100 - dim0, self.hidden_dim, device=urf.device)], 0)
+                    [urf, torch.zeros(100 - dim0, features_dim, device=urf.device)], 0)
 
         used_recurrent_features = torch.cat(used_recurrent_features)
 
-        recurrent_features_batch = used_recurrent_features.view(len(inputs), -1, self.hidden_dim)
-
-        # TASK 6
-        # add tweets time diffrences
-        diffs = get_tweets_diffs(inputs)
-
-        # for user data
-        if self.use_gdelt:
-            intense_indexes = intensity_indexes(diffs, tweets_per_user)
-        else:
-            intense_indexes = None
-
-        diffs = torch.cat(diffs).to(device)
-        diffs = diffs.unsqueeze(1)
+        recurrent_features_batch = used_recurrent_features.view(len(inputs), -1, features_dim)
 
         # TASK 7
-        recurrent_features_batch = recurrent_features_batch.view(-1, self.hidden_dim)
-        recurrent_features_batch = torch.cat([recurrent_features_batch, diffs], 1)
+        recurrent_features_batch = recurrent_features_batch.view(-1, features_dim)
 
         # TASK 8
-        return self.feature_extractor(recurrent_features_batch).view(len(inputs), -1,
-                                                                     self.output_dim), intense_indexes
+        return self.feature_extractor(recurrent_features_batch).view(len(inputs), -1, self.output_dim)

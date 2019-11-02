@@ -61,7 +61,7 @@ if __name__ == "__main__":
     infilecounter = 0
     outfilecounter = 0
 
-    local_path = '../db/Gdelt'
+    local_path = 'db/Gdelt'
 
     for compressed_file in file_list:
         print(f"{compressed_file}")

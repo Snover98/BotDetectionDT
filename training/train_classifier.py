@@ -1,6 +1,6 @@
 import sys
 
-sys.path.append('../')
+sys.path.append('')
 import torch
 from torch import nn
 from torch.optim.adam import Adam
@@ -67,7 +67,7 @@ def main(args):
     train_dl, test_dl = get_dataloaders(ds, batch_size=args.batch_size)
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
-    w2v_model = Word2Vec.load("../checkpoints/word2vec.model")
+    w2v_model = Word2Vec.load("checkpoints/word2vec.model")
 
     clf = BotClassifier(w2v_model, args.embedding_dim, args.rec_hidden_dim, args.tweet_features_dim, args.hidden_dim,
                         use_gdelt=args.use_gdelt, use_TCN=args.use_TCN, effective_history=args.effective_history,

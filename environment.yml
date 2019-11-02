@@ -13,8 +13,8 @@ dependencies:
   - tqdm
   - matplotlib
 #  # all pip dependencies
- - pip:
-     - astar-tcn --no-dependencies
-     - nltk
-     - pywikibot
-     - langdetect
+  - pip:
+    - astar-tcn --no-dependencies
+    - nltk
+    - pywikibot
+    - langdetect
