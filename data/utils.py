@@ -4,17 +4,13 @@ import numpy as np
 
 def get_tweets_diffs(inputs):
     diffs = []
-    for i, user in enumerate(inputs):
+    for user in inputs:
         diffs.append([0])
         if len(user) > 1:
-            former_date = user[0].date
-            for tweet in user[1:]:
-                diff = former_date - tweet.date
-                diffs[i].append(diff.seconds)
-                former_date = tweet.date
-        diffs[i] = torch.Tensor(diffs[i])
-        if diffs[i].shape[0] < 100:
-            diffs[i] = torch.cat([diffs[i], torch.zeros(100 - diffs[i].shape[0])])
+            diffs[-1] += [(tweet2.date - tweet1.date).seconds for tweet1, tweet2 in zip(user, user[1:])]
+        diffs[-1] = torch.Tensor(diffs[-1])
+        if diffs[-1].shape[0] < 100:
+            diffs[-1] = torch.cat([diffs[-1], torch.zeros(100 - diffs[-1].shape[0])])
     return diffs
 
 
