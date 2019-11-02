@@ -10,12 +10,23 @@ def get_tweets_diffs(inputs):
             former_date = user[0].date
             for tweet in user[1:]:
                 diff = former_date - tweet.date
-                diffs[i].append(diff.days)
+                diffs[i].append(diff.seconds)
                 former_date = tweet.date
         diffs[i] = torch.Tensor(diffs[i])
         if diffs[i].shape[0] < 100:
             diffs[i] = torch.cat([diffs[i], torch.zeros(100 - diffs[i].shape[0])])
     return diffs
+
+
+def get_tweets_avg_diffs(inputs):
+    diffs = []
+    for user in inputs:
+        if len(user) > 1:
+            diffs.append(
+                torch.Tensor([(tweet2.date - tweet1.date).seconds for tweet1, tweet2 in zip(user, user[1:])]).mean())
+        else:
+            diffs.append(torch.Tensor([0.0]))
+    return torch.cat(diffs)
 
 
 def get_max_indexes(diffs):

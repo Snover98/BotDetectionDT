@@ -4,7 +4,7 @@ import torch
 from torch import nn
 from typing import List
 from wikidata.wikidata import calculate_similarity_wikidata
-from data.utils import get_tweets_diffs
+from data.utils import get_tweets_avg_diffs, get_tweets_diffs
 from data.utils import intensity_indexes
 
 
@@ -71,16 +71,14 @@ class BotClassifier(nn.Module):
         # TASK 2
         users_tweets_features = self.tweets_combiner(users_tweets_features.view(len(inputs), -1))
 
-        diffs = get_tweets_diffs(tweet_lists)
-
         # for user data
         if self.use_gdelt:
-            intense_indexes = intensity_indexes(diffs, [len(user.tweets) for user in inputs])
+            intense_indexes = intensity_indexes(get_tweets_diffs(tweet_lists), [len(user.tweets) for user in inputs])
         else:
             intense_indexes = None
 
-        handmade_features.append(
-            torch.cat(diffs).to(device).view(len(inputs), self.num_tweets_per_user).mean(dim=1, keepdim=True))
+        diffs = get_tweets_avg_diffs(tweet_lists)
+        handmade_features.append(diffs.to(device).unsqueeze(1))
 
         # TASK 3
         if self.use_gdelt:
