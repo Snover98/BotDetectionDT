@@ -49,7 +49,7 @@ class BotClassifier(nn.Module):
             nn.BatchNorm1d(hidden_dim),
             nn.ReLU(),
             nn.Linear(hidden_dim, 2),
-            nn.Softmax()
+            nn.Softmax(dim=1)
         )
 
     def forward(self, inputs: List[User], important_topics):
