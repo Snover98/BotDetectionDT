@@ -34,10 +34,15 @@ class BotClassifier(nn.Module):
         if self.use_gdelt:
             tweet_features_dim += 1
 
-        self.classifier = nn.Sequential(
+
+        self.feature_extractor = nn.Sequential(
             nn.BatchNorm1d(tweet_features_dim),
             nn.ReLU(),
-            nn.Linear(tweet_features_dim, hidden_dim),
+            nn.Linear(tweet_features_dim, hidden_dim)
+        )
+
+
+        self.classifier = nn.Sequential(
             nn.BatchNorm1d(hidden_dim),
             nn.ReLU(),
             nn.Linear(hidden_dim, 2),
@@ -70,4 +75,5 @@ class BotClassifier(nn.Module):
             users_tweets_features = torch.cat([users_tweets_features, sims], 1)
 
         # TASK 4
-        return self.classifier(users_tweets_features)
+        features = self.feature_extractor(users_tweets_features)
+        return self.classifier(features)
