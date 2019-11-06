@@ -78,11 +78,14 @@ class UsersDataset(Dataset):
 
 
 def my_collate(batch):
-    data = [item[0] for item in batch]
-    it = [item[1] for item in batch]
-    target = [item[2] for item in batch]
-    target = torch.LongTensor(target)
-    return [(data, it), target]
+    if len(batch[0]) == 3:
+        user_data, it, target = tuple(zip(*batch))
+        target = torch.LongTensor(target)
+        return [(user_data, it), target]
+    else:
+        user_data, target = tuple(zip(*batch))
+        target = torch.LongTensor(target)
+        return [user_data, target]
 
 
 def second_date_format(file):
@@ -158,7 +161,7 @@ def get_dataloaders(ds: UsersDataset, train_ratio: float, batch_size: int, load_
 
 
 def get_ds_labels_as_np(ds: UsersDataset) -> List[int]:
-    dl = data.DataLoader(ds, batch_size=8, shuffle=False, num_workers=2)
+    dl = data.DataLoader(ds, batch_size=8, shuffle=False, num_workers=2, collate_fn=my_collate)
     all_labels = torch.cat([batch[-1] for batch in dl])
 
     return all_labels.numpy()
