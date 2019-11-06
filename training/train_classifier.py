@@ -63,7 +63,7 @@ def main(args):
     num_epochs = args.num_epochs
     loss_fn = nn.CrossEntropyLoss()
 
-    ds = UsersDataset(it_flag=True)
+    ds = UsersDataset(it_flag=args.use_gdelt)
     train_dl, test_dl = get_dataloaders(ds, batch_size=args.batch_size)
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
 

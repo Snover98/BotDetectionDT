@@ -52,7 +52,7 @@ class BotClassifier(nn.Module):
             nn.Softmax(dim=1)
         )
 
-    def forward(self, inputs: List[User], important_topics):
+    def forward(self, inputs: List[User], important_topics=None):
         """
         TODO:
         1) use the tweet feature extractor on the users
