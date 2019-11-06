@@ -17,7 +17,11 @@ def get_TCN_params_from_effective_history(history_len: int):
         # effective history: 57
         kernel_size = 5
         num_levels = 3
-    elif 57 <= history_len <= 91:
+    elif 57 <= history_len <= 71:
+        # effective history: 71
+        kernel_size = 6
+        num_levels = 3
+    elif 71 <= history_len <= 91:
         # effective history: 91
         kernel_size = 4
         num_levels = 4
