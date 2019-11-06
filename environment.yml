@@ -14,6 +14,7 @@ dependencies:
   - matplotlib
   - scikit-learn
 #  # all pip dependencies
+  - pip
   - pip:
     - astar-tcn --no-dependencies
     - nltk
