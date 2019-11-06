@@ -1,5 +1,7 @@
 import pandas as pd
 import torch
+import numpy as np
+from sklearn.model_selection import train_test_split
 from torch.utils import data
 from torch.utils.data import Dataset
 from .conn import connect
@@ -11,6 +13,7 @@ import glob
 from data.utils import get_tweets_diffs
 from data.utils import intensity_indexes
 import datetime
+from typing import List
 
 
 def get_users(df: pd.DataFrame):
@@ -82,15 +85,6 @@ def my_collate(batch):
     return [(data, it), target]
 
 
-def get_dataloaders(ds, train_ratio=0.8, batch_size=8):
-    train_amount = int(train_ratio * len(ds))
-    test_amount = len(ds) - train_amount
-    train_set, test_set = data.random_split(ds, (train_amount, test_amount))
-    train_dl = data.DataLoader(train_set, batch_size=batch_size, shuffle=True, num_workers=2, collate_fn=my_collate)
-    test_dl = data.DataLoader(test_set, batch_size=batch_size, shuffle=False, num_workers=2, collate_fn=my_collate)
-    return train_dl, test_dl
-
-
 def second_date_format(file):
     date = file[15:23]
     d = datetime.datetime(int(date[:4]), int(date[4:6]), int(date[6:8]))
@@ -149,6 +143,43 @@ def get_it():
     with open('data/listfile.txt', 'r') as filehandle:
         important_topics = json.load(filehandle)
     return important_topics
+
+
+def get_dataloaders(ds: UsersDataset, train_ratio: float, batch_size: int, load_rand_state: bool):
+    labels = get_ds_labels_as_np(ds)
+    train_indices, test_indices = stratified_train_test_split(labels, train_ratio, load_rand_state)
+
+    train_set = data.Subset(ds, train_indices)
+    test_set = data.Subset(ds, test_indices)
+
+    train_dl = data.DataLoader(train_set, batch_size=batch_size, shuffle=True, num_workers=2, collate_fn=my_collate)
+    test_dl = data.DataLoader(test_set, batch_size=batch_size, shuffle=False, num_workers=2, collate_fn=my_collate)
+    return train_dl, test_dl
+
+
+def get_ds_labels_as_np(ds: UsersDataset) -> List[int]:
+    all_labels = ds[np.arange(len(ds)).tolist()][-1]
+
+    return all_labels.numpy()
+
+
+def stratified_train_test_split(labels: List[int], train_ratio: float, load_rand_state: bool):
+    random_state = np.random.get_state()
+    if load_rand_state:
+        print("Loading saved random state from rand_state.pickle")
+        state_file = open('rand_state.pickle', 'rb')
+        random_state = pickle.load(state_file)
+        state_file.close()
+    else:
+        print("Saving random state into rand_state.pickle")
+        state_file = open('rand_state.pickle', 'wb')
+        pickle.dump(random_state, state_file)
+        state_file.close()
+
+    train_indices, test_indices = train_test_split(np.arange(len(labels)), train_size=train_ratio, stratify=labels,
+                                                   random_state=random_state)
+
+    return train_indices, test_indices
 
 
 if __name__ == "__main__":

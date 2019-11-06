@@ -17,6 +17,13 @@ def parse_arguments():
     parser.add_argument('-c', '--checkpoint_file', dest='checkpoint_file', type=str, default=None,
                         help="""The name of the checkpoint file we'd like to use.
                             If the flag is not used, checkpoints will not be saved or loaded during the training.""")
+    parser.add_argument('-r', '--load_rand_state', dest='load_rand_state', action='store_true', default=False,
+                        help="""A flag that's used if we want to use the numpy random state saved in rand_state.pickle 
+                            for the train/test split. 
+                            If not used, we'll override the rand_state.pickle file 
+                            with the default numpy random state used for the split.""")
+    parser.add_argument('--train_ratio', dest='train_ratio', type=float, default=0.8,
+                        help='The ratio of train samples from the dataset. default=0.8')
     parser.add_argument('-e', '--epochs', dest='num_epochs', default=25, type=int,
                         help='The number of epochs used in the training.')
     parser.add_argument('-t', '--use_TCN', dest='use_TCN', action='store_true', default=False,
@@ -64,7 +71,7 @@ def main(args):
     loss_fn = nn.CrossEntropyLoss()
 
     ds = UsersDataset(it_flag=args.use_gdelt)
-    train_dl, test_dl = get_dataloaders(ds, batch_size=args.batch_size)
+    train_dl, test_dl = get_dataloaders(ds, train_ratio=args.train_ratio, batch_size=args.batch_size, load_rand_state=args.load_rand_state)
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
     w2v_model = Word2Vec.load("checkpoints/word2vec.model")
