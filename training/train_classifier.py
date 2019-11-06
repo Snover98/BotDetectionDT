@@ -132,8 +132,9 @@ def main(args):
             if args.plot_results:
                 fig, _ = plot_fit(fit_res, fig=fig, legend=subrun_name.replace('_', ' '))
 
-    fig.suptitle(args.run_name)
-    plt.savefig(f"graphs/{args.run_name}.png")
+    if args.plot_results:
+        fig.suptitle(args.run_name)
+        plt.savefig(f"graphs/{args.run_name}.png")
 
 
 if __name__ == "__main__":
