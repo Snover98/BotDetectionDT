@@ -124,6 +124,7 @@ class Trainer(abc.ABC):
             # - Optional: Implement early stopping. This is a very useful and
             #   simple regularization technique that is highly recommended.
             # ====== YOUR CODE: ======
+            actual_num_epochs += 1
             losses, acc = self.train_epoch(dl_train, **kw)
             loss = average(losses)
             train_loss.append(loss)
