@@ -77,6 +77,9 @@ def parse_arguments():
 
 
 def main(args):
+    if args.plot_results:
+        plt.switch_backend('Agg')
+
     num_epochs = args.num_epochs
     loss_fn = nn.CrossEntropyLoss()
 
@@ -129,7 +132,7 @@ def main(args):
             if args.plot_results:
                 fig, _ = plot_fit(fit_res, fig=fig, legend=subrun_name.replace('_', ' '))
 
-    plt.title(args.run_name)
+    fig.suptitle(args.run_name)
     plt.savefig(f"graphs/{plt.title(args.run_name)}.png")
 
 
