@@ -85,7 +85,7 @@ def my_collate(batch):
     else:
         user_data, target = tuple(zip(*batch))
         target = torch.LongTensor(target)
-        return [user_data, target]
+        return [(user_data,), target]
 
 
 def second_date_format(file):
