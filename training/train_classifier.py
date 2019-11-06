@@ -44,9 +44,9 @@ def parse_arguments():
                         help="""The output dimension of the temporal extractor. default=128.""")
     parser.add_argument('--hidden_dim', dest='hidden_dim', default=1024, type=int,
                         help="""The hidden dimension of the classifier. default=1024.""")
-    parser.add_argument('--effective_history', dest='effective_history', default=91, type=int,
+    parser.add_argument('--effective_history', dest='effective_history', default=60, type=int,
                         help="""The maximum expected sequence length of a tweet after 
-                            removing stop words and such things. only relevant when use_TCN=True. default=91.""")
+                            removing stop words and such things. only relevant when use_TCN=True. default=60.""")
     parser.add_argument('--num_rec_layers', dest='num_rec_layers', default=1, type=int,
                         help="""The number of layers in the LSTM. Only relevant when use_TCN=False. default=1.""")
     parser.add_argument('--rec_dropout', dest='rec_dropout', type=float, nargs='?', const=0.2, default=0.0,
