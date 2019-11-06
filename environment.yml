@@ -12,6 +12,7 @@ dependencies:
   - numpy
   - tqdm
   - matplotlib
+  - scikit-learn
 #  # all pip dependencies
   - pip:
     - astar-tcn --no-dependencies
