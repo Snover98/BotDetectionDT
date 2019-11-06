@@ -168,20 +168,22 @@ def get_ds_labels_as_np(ds: UsersDataset) -> List[int]:
 
 
 def stratified_train_test_split(labels: List[int], train_ratio: float, load_rand_state: bool):
-    random_state = np.random.get_state()
     if load_rand_state:
         print("Loading saved random state from rand_state.pickle")
+        old_random_state = np.random.get_state()
         state_file = open('rand_state.pickle', 'rb')
-        random_state = pickle.load(state_file)
+        np.random.set_state(pickle.load(state_file))
         state_file.close()
     else:
         print("Saving random state into rand_state.pickle")
         state_file = open('rand_state.pickle', 'wb')
-        pickle.dump(random_state, state_file)
+        pickle.dump(np.random.get_state(), state_file)
         state_file.close()
 
-    train_indices, test_indices = train_test_split(np.arange(len(labels)), train_size=train_ratio, stratify=labels,
-                                                   random_state=random_state)
+    train_indices, test_indices = train_test_split(np.arange(len(labels)), train_size=train_ratio, stratify=labels)
+
+    if load_rand_state:
+        np.random.set_state(old_random_state)
 
     return train_indices, test_indices
 
