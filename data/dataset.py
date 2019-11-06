@@ -158,7 +158,8 @@ def get_dataloaders(ds: UsersDataset, train_ratio: float, batch_size: int, load_
 
 
 def get_ds_labels_as_np(ds: UsersDataset) -> List[int]:
-    all_labels = ds[np.arange(len(ds)).tolist()][-1]
+    dl = data.DataLoader(ds, batch_size=8, shuffle=False, num_workers=2)
+    all_labels = torch.cat([batch[-1] for batch in dl])
 
     return all_labels.numpy()
 
