@@ -66,10 +66,10 @@ def parse_arguments():
                             it will have a default of 0.2""")
     parser.add_argument('--plot_results', dest='plot_results', action='store_true', default=False,
                         help="A flag that's used if we want to plot the fit results with pyplot.")
-    parser.add_argument('--compare_temporal', dest='compare_temporal', ction='store_true', default=False,
+    parser.add_argument('--compare_temporal', dest='compare_temporal', action='store_true', default=False,
                         help="""A flag for comparing the temporal extractors.
                             If the flag is not used, we'll use the one specified by the -t flag.""")
-    parser.add_argument('--compare_gdelt', dest='compare_gdelt', ction='store_true', default=False,
+    parser.add_argument('--compare_gdelt', dest='compare_gdelt', action='store_true', default=False,
                         help="""A flag for comparing the model with and without gdelt.
                                 If the flag is not used, we'll use the one specified by the --use_gdelt flag.""")
 
