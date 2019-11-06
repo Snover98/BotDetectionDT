@@ -44,6 +44,15 @@ class FitResult(NamedTuple):
     test_acc: List[float]
 
 
+def display_fit_result(fit_res: FitResult):
+    print(f"The fit results are:")
+    print(f"Number of epochs:\t{fit_res.num_epochs}")
+    print(f"Train Losses:\t{fit_res.train_loss}")
+    print(f"Train Accuracies:\t{fit_res.train_acc}")
+    print(f"Test Losses:\t{fit_res.test_loss}")
+    print(f"Test Accuracies:\t{fit_res.test_acc}")
+
+
 def average(list):
     total = 0
     for elm in list:

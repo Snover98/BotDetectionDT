@@ -8,7 +8,7 @@ from torch.optim.sgd import SGD
 from gensim.models import Word2Vec
 import argparse
 from model.classification_model import BotClassifier
-from training.training_utils import TorchTrainer, plot_fit
+from training.training_utils import TorchTrainer, plot_fit, display_fit_result
 from data.dataset import get_dataloaders, UsersDataset
 
 
@@ -87,10 +87,17 @@ def main(args):
 
     trainer = TorchTrainer(clf, loss_fn, optim, device=device)
 
+    print("================================================================================")
+    print("===============================|STARTED TRAINING|===============================")
+    print("================================================================================")
+    print('')
     fit_res = trainer.fit(train_dl, test_dl, num_epochs, checkpoints=args.checkpoint_file,
                           early_stopping=args.early_stopping)
-    print("Fit result:")
-    print(fit_res)
+    print("================================================================================")
+    print('===================================|FINISHED|===================================')
+    print("================================================================================")
+    print('')
+    display_fit_result(fit_res)
 
     if args.plot_results:
         plot_fit(fit_res, legend='First Training')
