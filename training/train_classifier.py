@@ -10,12 +10,16 @@ import argparse
 from model.classification_model import BotClassifier
 from training.training_utils import TorchTrainer, plot_fit, display_fit_result
 from data.dataset import get_dataloaders, UsersDataset
+import matplotlib.pyplot as plt
 
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description='Run the train loop.')
-    parser.add_argument('-c', '--checkpoint_file', dest='checkpoint_file', type=str, default=None,
-                        help="""The name of the checkpoint file we'd like to use.
+    parser.add_argument('-n', '--run_name', dest='run_name', type=str, required=True,
+                        help="""The name of the current run. 
+                                Used in the checkpoint and figure names (if these are used).""")
+    parser.add_argument('-c', '--use_checkpoint', dest='use_checkpoint', ction='store_true', default=False,
+                        help="""A flag for using checkpoints in our training.
                             If the flag is not used, checkpoints will not be saved or loaded during the training.""")
     parser.add_argument('-r', '--load_rand_state', dest='load_rand_state', action='store_true', default=False,
                         help="""A flag that's used if we want to use the numpy random state saved in rand_state.pickle 
@@ -62,6 +66,12 @@ def parse_arguments():
                             it will have a default of 0.2""")
     parser.add_argument('--plot_results', dest='plot_results', action='store_true', default=False,
                         help="A flag that's used if we want to plot the fit results with pyplot.")
+    parser.add_argument('--compare_temporal', dest='compare_temporal', ction='store_true', default=False,
+                        help="""A flag for comparing the temporal extractors.
+                            If the flag is not used, we'll use the one specified by the -t flag.""")
+    parser.add_argument('--compare_gdelt', dest='compare_gdelt', ction='store_true', default=False,
+                        help="""A flag for comparing the model with and without gdelt.
+                                If the flag is not used, we'll use the one specified by the --use_gdelt flag.""")
 
     return parser.parse_args()
 
@@ -70,38 +80,57 @@ def main(args):
     num_epochs = args.num_epochs
     loss_fn = nn.CrossEntropyLoss()
 
-    ds = UsersDataset(it_flag=args.use_gdelt)
+    ds = UsersDataset(it_flag=args.args.use_gdelt or args.compare_gdelt)
     train_dl, test_dl = get_dataloaders(ds, train_ratio=args.train_ratio, batch_size=args.batch_size,
                                         load_rand_state=args.load_rand_state)
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
     w2v_model = Word2Vec.load("checkpoints/word2vec.model")
 
-    clf = BotClassifier(w2v_model, args.embedding_dim, args.rec_hidden_dim, args.tweet_features_dim, args.hidden_dim,
-                        use_gdelt=args.use_gdelt, use_TCN=args.use_TCN, effective_history=args.effective_history,
-                        num_rec_layers=args.num_rec_layers, rec_dropout=args.rec_dropout).to(device)
+    temporal_options = [False, True] if args.compare_temporal else [args.use_TCN]
+    gdelt_options = [False, True] if args.compare_gdelt else [args.use_gdelt]
+    fig = None
 
-    if args.use_SGD:
-        optim = SGD(params=clf.parameters(), lr=args.learning_rate, weight_decay=args.weight_decay)
-    else:
-        optim = Adam(params=clf.parameters(), lr=args.learning_rate, weight_decay=args.weight_decay)
+    for use_gdelt in gdelt_options:
+        for use_TCN in temporal_options:
+            temporal_ext_name = "TCN" if use_TCN else "LSTM"
+            subrun_name = f"{args.run_name}_{temporal_ext_name}"
+            if use_gdelt:
+                subrun_name += "_GDELT"
 
-    trainer = TorchTrainer(clf, loss_fn, optim, device=device)
+            clf = BotClassifier(w2v_model, args.embedding_dim, args.rec_hidden_dim, args.tweet_features_dim,
+                                args.hidden_dim, use_gdelt=use_gdelt, use_TCN=use_TCN,
+                                effective_history=args.effective_history, num_rec_layers=args.num_rec_layers,
+                                rec_dropout=args.rec_dropout).to(device)
 
-    print("================================================================================")
-    print("===============================|STARTED TRAINING|===============================")
-    print("================================================================================")
-    print('')
-    fit_res = trainer.fit(train_dl, test_dl, num_epochs, checkpoints=args.checkpoint_file,
-                          early_stopping=args.early_stopping)
-    print("================================================================================")
-    print('===================================|FINISHED|===================================')
-    print("================================================================================")
-    print('')
-    display_fit_result(fit_res)
+            if args.use_SGD:
+                optim = SGD(params=clf.parameters(), lr=args.learning_rate, weight_decay=args.weight_decay)
+            else:
+                optim = Adam(params=clf.parameters(), lr=args.learning_rate, weight_decay=args.weight_decay)
 
-    if args.plot_results:
-        plot_fit(fit_res, legend='First Training')
+            trainer = TorchTrainer(clf, loss_fn, optim, device=device)
+
+            checkpoint_file = None
+            if args.use_checkpoint:
+                checkpoint_file = f"{subrun_name}.model"
+
+            print("================================================================================")
+            print("===============================|STARTED TRAINING|===============================")
+            print("================================================================================")
+            print(f'Training with extractor {temporal_ext_name} and use_gdelt={use_gdelt}:')
+            fit_res = trainer.fit(train_dl, test_dl, num_epochs, checkpoints=checkpoint_file,
+                                  early_stopping=args.early_stopping)
+            print("================================================================================")
+            print('===================================|FINISHED|===================================')
+            print("================================================================================")
+            print('')
+            display_fit_result(fit_res)
+
+            if args.plot_results:
+                fig = plot_fit(fit_res, fig=fig, legend=subrun_name.replace('_', ' '))
+
+    plt.title(args.run_name)
+    plt.savefig(f"graphs/{plt.title(args.run_name)}.png")
 
 
 if __name__ == "__main__":
