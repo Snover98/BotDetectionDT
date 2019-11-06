@@ -47,9 +47,9 @@ class FitResult(NamedTuple):
 def display_fit_result(fit_res: FitResult):
     print(f"The fit results are:")
     print(f"Number of epochs:\t{fit_res.num_epochs}")
-    print(f"Train Losses:\t{fit_res.train_loss}")
+    print(f"Train Losses:\t\t{fit_res.train_loss}")
     print(f"Train Accuracies:\t{fit_res.train_acc}")
-    print(f"Test Losses:\t{fit_res.test_loss}")
+    print(f"Test Losses:\t\t{fit_res.test_loss}")
     print(f"Test Accuracies:\t{fit_res.test_acc}")
 
 
@@ -353,12 +353,15 @@ def plot_fit(fit_res: FitResult, fig=None, log_loss=False, legend=None):
     Plots a FitResult object.
     Creates four plots: train loss, test loss, train acc, test acc.
     :param fit_res: The fit result to plot.
+    :param fig_title: the title of the figure
     :param fig: A figure previously returned from this function. If not None,
         plots will the added to this figure.
     :param log_loss: Whether to plot the losses in log scale.
     :param legend: What to call this FitResult in the legend.
     :return: The figure.
     """
+
+    plt.switch_backend('Agg')
     if fig is None:
         fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(16, 10),
                                  sharex='col', sharey=False)
