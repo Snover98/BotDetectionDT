@@ -18,7 +18,7 @@ def parse_arguments():
     parser.add_argument('-n', '--run_name', dest='run_name', type=str, required=True,
                         help="""The name of the current run. 
                                 Used in the checkpoint and figure names (if these are used).""")
-    parser.add_argument('-c', '--use_checkpoint', dest='use_checkpoint', ction='store_true', default=False,
+    parser.add_argument('-c', '--use_checkpoint', dest='use_checkpoint', action='store_true', default=False,
                         help="""A flag for using checkpoints in our training.
                             If the flag is not used, checkpoints will not be saved or loaded during the training.""")
     parser.add_argument('-r', '--load_rand_state', dest='load_rand_state', action='store_true', default=False,
