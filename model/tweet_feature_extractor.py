@@ -110,7 +110,7 @@ class TweetFeatureExtractor(nn.Module):
             torch.Tensor([sum([len(entity) for entity in tweet.entities.values()]) for tweet in sum(inputs, [])]).to(
                 device).unsqueeze(1))
 
-        handmade_features = (torch.cat(handmade_features, dim=1) - self.means) / self.stds
+        handmade_features = (torch.cat(handmade_features, dim=1) - self.means.to(device)) / self.stds.to(device)
 
         features_dim = self.hidden_dim + self.num_handmade_features
         used_recurrent_features = torch.cat((used_recurrent_features, handmade_features), dim=1)

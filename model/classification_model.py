@@ -95,7 +95,7 @@ class BotClassifier(nn.Module):
         handmade_features.append(torch.Tensor([user.followers_count for user in inputs]).to(device).unsqueeze(1))
         handmade_features.append(torch.Tensor([user.friends_count for user in inputs]).to(device).unsqueeze(1))
 
-        handmade_features = (torch.cat(handmade_features, dim=1) - self.means) / self.stds
+        handmade_features = (torch.cat(handmade_features, dim=1) - self.means.to(device)) / self.stds.to(device)
 
         # TASK 4
         users_tweets_features = torch.cat((users_tweets_features, handmade_features), dim=1)
