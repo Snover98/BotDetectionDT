@@ -52,6 +52,13 @@ class BotClassifier(nn.Module):
             nn.Softmax(dim=1)
         )
 
+        if use_gdelt:
+            self.means = torch.Tensor([5.6675e+04, 6.6008e-01, 3.2708e+03, 6.6564e+02])
+            self.stds = torch.Tensor([2.2061e+04, 2.8933e+00, 2.1951e+04, 1.3241e+03])
+        else:
+            self.means = torch.Tensor([5.6675e+04, 3.2708e+03, 6.6564e+02])
+            self.stds = torch.Tensor([2.2061e+04, 2.1951e+04, 1.3241e+03])
+
     def forward(self, inputs: List[User], important_topics=None):
         """
         TODO:
@@ -88,7 +95,9 @@ class BotClassifier(nn.Module):
         handmade_features.append(torch.Tensor([user.followers_count for user in inputs]).to(device).unsqueeze(1))
         handmade_features.append(torch.Tensor([user.friends_count for user in inputs]).to(device).unsqueeze(1))
 
+        handmade_features = (torch.cat(handmade_features, dim=1) - self.means) / self.stds
+
         # TASK 4
-        users_tweets_features = torch.cat((users_tweets_features, *handmade_features), dim=1)
+        users_tweets_features = torch.cat((users_tweets_features, handmade_features), dim=1)
         features = self.feature_extractor(users_tweets_features)
         return self.classifier(features)

@@ -42,6 +42,9 @@ class TweetFeatureExtractor(nn.Module):
         self.num_handmade_features = 4
         self.feature_extractor = nn.Linear(hidden_dim + self.num_handmade_features, output_dim)
 
+        self.means = torch.Tensor([1.0901, 0.0135, 0.8929, 2.8000])
+        self.stds = torch.Tensor([17.6291,  0.1156,  0.3092,  1.9421])
+
     @staticmethod
     def sorted_seq_by_len(sequences) -> Tuple[List[int], List[int]]:
         seq_end_lengths_dict = {idx: seq.shape[0] for idx, seq in enumerate(sequences)}
@@ -107,8 +110,10 @@ class TweetFeatureExtractor(nn.Module):
             torch.Tensor([sum([len(entity) for entity in tweet.entities.values()]) for tweet in sum(inputs, [])]).to(
                 device).unsqueeze(1))
 
+        handmade_features = (torch.cat(handmade_features, dim=1) - self.means) / self.stds
+
         features_dim = self.hidden_dim + self.num_handmade_features
-        used_recurrent_features = torch.cat((used_recurrent_features, *handmade_features), dim=1)
+        used_recurrent_features = torch.cat((used_recurrent_features, handmade_features), dim=1)
 
         # TASK 5
         used_recurrent_features = list(torch.split(used_recurrent_features, tweets_per_user))
