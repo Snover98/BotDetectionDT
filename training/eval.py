@@ -45,7 +45,7 @@ def eval_torch_classifier(model, optimizer, train_dl, test_dl, loss_fn):
         # Optimize params
         optimizer.step()
 
-    confusion_mat = torch.zeros((4))
+    confusion_mat = torch.zeros(4)
     avg_acc = 0
     num_batches = len(test_dl.batch_sampler)
     avg_loss = 0
