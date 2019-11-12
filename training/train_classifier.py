@@ -9,6 +9,7 @@ from gensim.models import Word2Vec
 import argparse
 from model.classification_model import BotClassifier
 from training.training_utils import TorchTrainer, plot_fit, display_fit_result
+from training.utils import get_subrun_name
 from data.dataset import get_dataloaders, UsersDataset
 import matplotlib.pyplot as plt
 
@@ -96,10 +97,7 @@ def main(args):
 
     for use_gdelt in gdelt_options:
         for use_TCN in temporal_options:
-            temporal_ext_name = "TCN" if use_TCN else "LSTM"
-            subrun_name = f"{args.run_name}_{temporal_ext_name}"
-            if use_gdelt:
-                subrun_name += "_GDELT"
+            subrun_name = get_subrun_name(args.run_name, use_gdelt=use_gdelt, use_TCN=use_TCN)
 
             clf = BotClassifier(w2v_model, args.embedding_dim, args.rec_hidden_dim, args.tweet_features_dim,
                                 args.hidden_dim, use_gdelt=use_gdelt, use_TCN=use_TCN,
@@ -120,7 +118,7 @@ def main(args):
             print("================================================================================")
             print("===============================|STARTED TRAINING|===============================")
             print("================================================================================")
-            print(f'Training with extractor {temporal_ext_name} and use_gdelt={use_gdelt}:')
+            print(f'Training with extractor {"TCN" if use_TCN else "LSTM"} and use_gdelt={use_gdelt}:')
             fit_res = trainer.fit(train_dl, test_dl, num_epochs, checkpoints=checkpoint_file,
                                   early_stopping=args.early_stopping)
             print("================================================================================")
