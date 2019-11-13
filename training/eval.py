@@ -234,10 +234,10 @@ def eval_sklearn_model(model, train_df, test_df, subrun_name: str = None):
 
 def eval_results(y_true, y_pred, subrun_name: str = None, verbose: bool = False):
     precision, recall, f1_score, _ = precision_recall_fscore_support(y_true, y_pred, average='binary')
-    accuracy = accuracy_score(y_true, y_pred) * 100
+    accuracy = accuracy_score(y_true, y_pred)
 
     if verbose:
-        print(f"The test accuracy is:\t{accuracy}%")
+        print(f"The test accuracy is:\t{accuracy}")
         print(f"The test f1 score is:\t{f1_score}")
         print(f"The test precision score is:\t{precision}")
         print(f"the test recall score is:\t{recall}")
