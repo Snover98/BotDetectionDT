@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 import itertools
 from typing import NamedTuple, List, Tuple
 import argparse
+import pprint
 
 from sklearn.metrics import confusion_matrix
 from sklearn.utils.multiclass import unique_labels
@@ -20,6 +21,7 @@ from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier
 from data.dataset import get_dataloaders, UsersDataset
 from training.utils import *
 
+pp = pprint.PrettyPrinter(indent=4)
 
 class Identity(nn.Module):
     def __init__(self):
@@ -71,7 +73,6 @@ def plot_confusion_matrix(y_true, y_pred, classes,
     # Compute confusion matrix
     cm = confusion_matrix(y_true, y_pred)
     # Only use the labels that appear in the data
-    classes = classes[unique_labels(y_true, y_pred)]
     if normalize:
         cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
         print("Normalized confusion matrix")
@@ -141,7 +142,6 @@ def extract_dataloader_features(trained_extractor: BotClassifier, dl):
 
     for batch, labels in dl:
         labels = labels.cpu().numpy()
-        labels = list(map(lambda i: 'Human' if i == 0 else 'Bot', labels))
         ids = [user.id for user in batch[0]]
 
         features = trained_extractor(*batch).cpu().detach().numpy()
@@ -330,12 +330,12 @@ def eval_KNN():
     # Uniform
     uniform_results = compare_subruns_by_hyperparam_values(run_name, KNeighborsClassifier, {}, 'n_neighbors', K_vals)
     print('Uniform Results:')
-    print(uniform_results)
+    pp.pprint(uniform_results)
     # Distance
     distance_results = compare_subruns_by_hyperparam_values(run_name, KNeighborsClassifier, {'weights': 'distance'},
-                                                            'n_neighbors ', K_vals)
+                                                            'n_neighbors', K_vals)
     print('Distance Results:')
-    print(distance_results)
+    pp.pprint(distance_results)
     # plot results
     KNN_names = ['Uniform', 'Distance']
     KNN_results = [uniform_results, distance_results]
@@ -356,19 +356,19 @@ def eval_SVM():
     # linear
     linear_results = compare_subruns_by_hyperparam_values(run_name, SVC, {'kernel': 'linear'}, 'C', C_vals)
     print('Linear Results:')
-    print(linear_results)
+    pp.pprint(linear_results)
     # Poly
     poly_results = compare_subruns_by_hyperparam_values(run_name, SVC, {'kernel': 'poly'}, 'C', C_vals)
     print('Poly Results:')
-    print(poly_results)
+    pp.pprint(poly_results)
     # Rbf
     rbf_results = compare_subruns_by_hyperparam_values(run_name, SVC, {}, 'C', C_vals)
     print('Rbf Results:')
-    print(rbf_results)
+    pp.pprint(rbf_results)
     # Sigmoid
     sigmoid_results = compare_subruns_by_hyperparam_values(run_name, SVC, {'kernel': 'sigmoid'}, 'C', C_vals)
     print('Sigmoid Results:')
-    print(sigmoid_results)
+    pp.pprint(sigmoid_results)
     # plot results
     SVM_names = ['Linear', 'Poly', 'Rbf', 'Sigmoid']
     SVM_results = [linear_results, poly_results, rbf_results, sigmoid_results]
@@ -389,27 +389,27 @@ def eval_trees():
     none_results = compare_subruns_by_hyperparam_values(run_name, DecisionTreeClassifier, {}, "min_samples_split",
                                                         min_samples_vals)
     print("100% max features:")
-    print(none_results)
+    pp.pprint(none_results)
     # 0.6
     point6_results = compare_subruns_by_hyperparam_values(run_name, DecisionTreeClassifier, {'max_features': 0.6},
                                                           "min_samples_split", min_samples_vals)
     print("60% max features:")
-    print(point6_results)
+    pp.pprint(point6_results)
     # log2
     log2_results = compare_subruns_by_hyperparam_values(run_name, DecisionTreeClassifier, {'max_features': 'log2'},
                                                         "min_samples_split", min_samples_vals)
     print("log2 max features:")
-    print(log2_results)
+    pp.pprint(log2_results)
     # auto
     auto_results = compare_subruns_by_hyperparam_values(run_name, DecisionTreeClassifier, {'max_features': 'auto'},
                                                         "min_samples_split", min_samples_vals)
     print("auto max features:")
-    print(auto_results)
+    pp.pprint(auto_results)
     # 0.8
     point8_results = compare_subruns_by_hyperparam_values(run_name, DecisionTreeClassifier, {'max_features': 0.8},
                                                           "min_samples_split", min_samples_vals)
     print("80% max features:")
-    print(point8_results)
+    pp.pprint(point8_results)
     # plot results
     tree_names = ['None', '0.6', 'log2', 'auto', '0.8']
     tree_results = [none_results, point6_results, log2_results, auto_results, point8_results]
@@ -436,7 +436,7 @@ def eval_rand_forest():
     # print results
     for n_estimators, results in zip(num_estimators_vals, random_forest_results):
         print(f"{n_estimators} estimators:")
-        print(results)
+        pp.pprint(results)
 
     # plot results
     random_forest_names = [str(val) for val in num_estimators_vals]
@@ -459,12 +459,12 @@ def eval_adaboost():
     SAMME_R_results = compare_subruns_by_hyperparam_values(run_name, AdaBoostClassifier, {}, 'n_estimators',
                                                            num_estimators_vals)
     print("SAMME.R:")
-    print(SAMME_R_results)
+    pp.pprint(SAMME_R_results)
     # Using SAMME
     SAMME_results = compare_subruns_by_hyperparam_values(run_name, AdaBoostClassifier, {'algorithm': 'SAMME'},
                                                          'n_estimators', num_estimators_vals)
     print("SAMME:")
-    print(SAMME_results)
+    pp.pprint(SAMME_results)
     # plot results
     adaboost_names = ['SAMME.R', 'SAMME']
     adaboost_results = [SAMME_R_results, SAMME_results]
