@@ -90,6 +90,8 @@ def plot_confusion_matrix(y_true, y_pred, classes,
            title=title,
            ylabel='True label',
            xlabel='Predicted label')
+    ax.set_xticks(np.arange(cm.shape[1] + 1) - .5, minor=True)
+    ax.set_yticks(np.arange(cm.shape[0] + 1) - .5, minor=True)
 
     # Rotate the tick labels and set their alignment.
     plt.setp(ax.get_xticklabels(), rotation=45, ha="right",
