@@ -27,5 +27,5 @@ def create_model(use_gdelt: bool, use_TCN: bool):
     if use_TCN:
         rec_hidden_dim = 256
 
-    return BotClassifier(w2v_model, 1024, rec_hidden_dim, 128, 1024, use_gdelt=use_gdelt, use_TCN=use_TCN,
+    return BotClassifier(w2v_model, 100, rec_hidden_dim, 128, 1024, use_gdelt=use_gdelt, use_TCN=use_TCN,
                          effective_history=60, num_rec_layers=1, rec_dropout=0.0).to(device)
