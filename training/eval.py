@@ -203,6 +203,7 @@ def eval_results(y_true, y_pred, subrun_name: str = None):
         fig, ax = plot_confusion_matrix(y_true, y_pred, ['Human', 'Bot'], title=confusion_matrix_title)
         plt.show()
         plt.savefig(f"graphs/{confusion_matrix_title.replace(' ', '_')}.png")
+        plt.close(fig)
 
     return EvaluationResult(accuracy, f1_score, precision, recall)
 
@@ -341,6 +342,7 @@ def eval_KNN():
     fig = plot_similar_models(run_name, KNN_names, 'n_neighbors', K_vals, KNN_results)
     plt.show()
     plt.savefig(f"graphs/KNN_results.png")
+    plt.close(fig)
 
 
 def eval_SVM():
@@ -373,6 +375,7 @@ def eval_SVM():
     fig = plot_similar_models(run_name, SVM_names, 'C', C_vals, SVM_results)
     plt.show()
     plt.savefig(f"graphs/SVM_results.png")
+    plt.close(fig)
 
 
 def eval_trees():
@@ -413,6 +416,7 @@ def eval_trees():
     fig = plot_similar_models(run_name, tree_names, 'min_samples_split', min_samples_vals, tree_results)
     plt.show()
     plt.savefig(f"graphs/Trees_results.png")
+    plt.close(fig)
 
 
 def eval_rand_forest():
@@ -440,6 +444,7 @@ def eval_rand_forest():
                               random_forest_results)
     plt.show()
     plt.savefig(f"graphs/Rand_Forest_results.png")
+    plt.close(fig)
 
 
 def eval_adaboost():
@@ -466,6 +471,7 @@ def eval_adaboost():
     fig = plot_similar_models(run_name, adaboost_names, 'n_estimators', num_estimators_vals, adaboost_results)
     plt.show()
     plt.savefig(f"graphs/Adaboost_results.png")
+    plt.close(fig)
 
 
 def evaluate_sklearn_models():
