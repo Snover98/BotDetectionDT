@@ -54,6 +54,49 @@ def model_comp_result_from_eval_results(evaluation_results: List[EvaluationResul
     return ModelComparisonResult(*tuple(zip(*evaluation_results)))
 
 
+def plot_model_res_comp_color_map(res: ModelComparisonResult, hyperparam_name: str, hyperparam_vals, subrun_name: str,
+                                  model_name: str):
+    metrics = ['accuracy', 'f1 score', 'precision', 'recall']
+    fig, _ = plot_color_map(np.stack(res), subrun_name, hyperparam_name, hyperparam_vals, metrics)
+    plt.savefig(f"graphs/{model_name}_{subrun_name}_metrics.png")
+    plt.show()
+    plt.close(fig)
+
+
+def plot_subruns_res_comp_color_map(res: SubrunsModelComparisionResult, hyperparam_name: str, hyperparam_vals,
+                                    model_name: str):
+    plot_model_res_comp_color_map(res.LSTM_result, hyperparam_name, hyperparam_vals, 'LSTM', model_name)
+    plot_model_res_comp_color_map(res.TCN_result, hyperparam_name, hyperparam_vals, 'TCN', model_name)
+    plot_model_res_comp_color_map(res.LSTM_GDELT_result, hyperparam_name, hyperparam_vals, 'LSTM w/ GDELT', model_name)
+    plot_model_res_comp_color_map(res.TCN_GDELT_result, hyperparam_name, hyperparam_vals, 'TCN w/ GDELT', model_name)
+
+
+def plot_color_map(mat, title: str, x_label, xticklabels, yticklabels, cmap=plt.cm.Blues):
+    fig, ax = plt.subplots()
+    im = ax.imshow(mat, interpolation='nearest', cmap=cmap)
+    ax.figure.colorbar(im, ax=ax)
+    # We want to show all ticks...
+    ax.set(xticks=np.arange(mat.shape[1]),
+           yticks=np.arange(mat.shape[0]),
+           # ... and label them with the respective list entries
+           xticklabels=xticklabels, yticklabels=yticklabels,
+           title=title,
+           xlabel=x_label)
+
+    ax.set_xticks(np.arange(mat.shape[1] + 1) - .5, minor=True)
+    ax.set_yticks(np.arange(mat.shape[0] + 1) - .5, minor=True)
+
+    # Loop over data dimensions and create text annotations.
+    thresh = mat.max() / 2.
+    for i in range(mat.shape[0]):
+        for j in range(mat.shape[1]):
+            ax.text(j, i, format(mat[i, j], 'd'),
+                    ha="center", va="center",
+                    color="white" if mat[i, j] > thresh else "black")
+    fig.tight_layout()
+    return fig, ax
+
+
 def plot_confusion_matrix(y_true, y_pred, classes,
                           normalize=False,
                           title=None,
@@ -330,13 +373,11 @@ def eval_KNN():
     K_vals = (3, 5, 7, 9, 15, 20, 30, 40, 50)
     # Uniform
     uniform_results = compare_subruns_by_hyperparam_values(run_name, KNeighborsClassifier, {}, 'n_neighbors', K_vals)
-    print('Uniform Results:')
-    print(uniform_results)
+    plot_subruns_res_comp_color_map(uniform_results, 'n_neighbors', K_vals, 'KNN_Uniform')
     # Distance
     distance_results = compare_subruns_by_hyperparam_values(run_name, KNeighborsClassifier, {'weights': 'distance'},
                                                             'n_neighbors', K_vals)
-    print('Distance Results:')
-    print(distance_results)
+    plot_subruns_res_comp_color_map(distance_results, 'n_neighbors', K_vals, 'KNN_Distance')
     # plot results
     KNN_names = ['Uniform', 'Distance']
     KNN_results = [uniform_results, distance_results]
@@ -353,23 +394,19 @@ def eval_SVM():
     print("SVM eval")
     print('===========================')
     # SVM with kernels (Linear, Poly, Rbf, Sigmoid), hyperparam=C (0.25, 0.5, 1, 5)
-    C_vals = (0.25, 0.5, 1.0, 5.0)
+    C_vals = (0.25, 0.5, 1.0, 2.5, 5.0, 10.0, 20.0)
     # linear
     linear_results = compare_subruns_by_hyperparam_values(run_name, SVC, {'kernel': 'linear'}, 'C', C_vals)
-    print('Linear Results:')
-    print(linear_results)
+    plot_subruns_res_comp_color_map(linear_results, 'C', C_vals, 'SVM_Linear')
     # Poly
     poly_results = compare_subruns_by_hyperparam_values(run_name, SVC, {'kernel': 'poly'}, 'C', C_vals)
-    print('Poly Results:')
-    print(poly_results)
+    plot_subruns_res_comp_color_map(poly_results, 'C', C_vals, 'SVM_Poly')
     # Rbf
     rbf_results = compare_subruns_by_hyperparam_values(run_name, SVC, {}, 'C', C_vals)
-    print('Rbf Results:')
-    print(rbf_results)
+    plot_subruns_res_comp_color_map(rbf_results, 'C', C_vals, 'SVM_Rbf')
     # Sigmoid
     sigmoid_results = compare_subruns_by_hyperparam_values(run_name, SVC, {'kernel': 'sigmoid'}, 'C', C_vals)
-    print('Sigmoid Results:')
-    print(sigmoid_results)
+    plot_subruns_res_comp_color_map(sigmoid_results, 'C', C_vals, 'SVM_Sigmoid')
     # plot results
     SVM_names = ['Linear', 'Poly', 'Rbf', 'Sigmoid']
     SVM_results = [linear_results, poly_results, rbf_results, sigmoid_results]
@@ -389,28 +426,23 @@ def eval_trees():
     # None
     none_results = compare_subruns_by_hyperparam_values(run_name, DecisionTreeClassifier, {}, "min_samples_split",
                                                         min_samples_vals)
-    print("100% max features:")
-    print(none_results)
+    plot_subruns_res_comp_color_map(none_results, 'min_samples_split', min_samples_vals, 'Tree_None')
     # 0.6
     point6_results = compare_subruns_by_hyperparam_values(run_name, DecisionTreeClassifier, {'max_features': 0.6},
                                                           "min_samples_split", min_samples_vals)
-    print("60% max features:")
-    print(point6_results)
+    plot_subruns_res_comp_color_map(point6_results, 'min_samples_split', min_samples_vals, 'Tree_06')
     # log2
     log2_results = compare_subruns_by_hyperparam_values(run_name, DecisionTreeClassifier, {'max_features': 'log2'},
                                                         "min_samples_split", min_samples_vals)
-    print("log2 max features:")
-    print(log2_results)
+    plot_subruns_res_comp_color_map(log2_results, 'min_samples_split', min_samples_vals, 'Tree_log2')
     # auto
     auto_results = compare_subruns_by_hyperparam_values(run_name, DecisionTreeClassifier, {'max_features': 'auto'},
                                                         "min_samples_split", min_samples_vals)
-    print("auto max features:")
-    print(auto_results)
+    plot_subruns_res_comp_color_map(auto_results, 'min_samples_split', min_samples_vals, 'Tree_auto')
     # 0.8
     point8_results = compare_subruns_by_hyperparam_values(run_name, DecisionTreeClassifier, {'max_features': 0.8},
                                                           "min_samples_split", min_samples_vals)
-    print("80% max features:")
-    print(point8_results)
+    plot_subruns_res_comp_color_map(point8_results, 'min_samples_split', min_samples_vals, 'Tree_08')
     # plot results
     tree_names = ['None', '0.6', 'log2', 'auto', '0.8']
     tree_results = [none_results, point6_results, log2_results, auto_results, point8_results]
@@ -436,8 +468,7 @@ def eval_rand_forest():
     ]
     # print results
     for n_estimators, results in zip(num_estimators_vals, random_forest_results):
-        print(f"{n_estimators} estimators:")
-        print(results)
+        plot_subruns_res_comp_color_map(results, 'min_samples_split', min_samples_vals, f'Rand_Forest_{n_estimators}')
 
     # plot results
     random_forest_names = [str(val) for val in num_estimators_vals]
@@ -459,13 +490,11 @@ def eval_adaboost():
     num_estimators_vals = (10, 50, 100, 200)
     SAMME_R_results = compare_subruns_by_hyperparam_values(run_name, AdaBoostClassifier, {}, 'n_estimators',
                                                            num_estimators_vals)
-    print("SAMME.R:")
-    print(SAMME_R_results)
+    plot_subruns_res_comp_color_map(SAMME_R_results, 'n_estimators', num_estimators_vals, 'Adaboost_SAMME_R')
     # Using SAMME
     SAMME_results = compare_subruns_by_hyperparam_values(run_name, AdaBoostClassifier, {'algorithm': 'SAMME'},
                                                          'n_estimators', num_estimators_vals)
-    print("SAMME:")
-    print(SAMME_results)
+    plot_subruns_res_comp_color_map(SAMME_results, 'n_estimators', num_estimators_vals, 'Adaboost_SAMME')
     # plot results
     adaboost_names = ['SAMME.R', 'SAMME']
     adaboost_results = [SAMME_R_results, SAMME_results]
