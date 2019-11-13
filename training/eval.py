@@ -126,8 +126,8 @@ def eval_torch_classifier(model, test_dl, subrun_name: str = None):
         y_trues.append(labels)
         y_preds.append(y_hat.argmax(dim=1))
 
-    y_true = torch.cat(*y_trues).numpy()
-    y_pred = torch.cat(*y_preds).numpy()
+    y_true = torch.cat(y_trues).numpy()
+    y_pred = torch.cat(y_preds).numpy()
 
     avg_loss = tot_loss / y_pred.shape[0]
 
