@@ -241,7 +241,7 @@ def compare_subruns_by_hyperparam_values(run_name: str, ModelClass, other_init_p
 def plot_model_comparison(run_name: str, hyperparam_name: str, hyperparam_vals: List,
                           comp_res: SubrunsModelComparisionResult, fig=None, legend=None):
     if fig is None:
-        fig, axes = plt.subplots(nrows=4, ncols=4, figsize=(32, 20),
+        fig, axes = plt.subplots(nrows=4, ncols=4, figsize=(64, 40),
                                  sharex='col', sharey='row')
         axes = axes.reshape(-1)
     else:
@@ -266,7 +266,7 @@ def plot_model_comparison(run_name: str, hyperparam_name: str, hyperparam_vals: 
         if metric == "accuracies":
             metric_name = 'accuracy'
 
-        if idx % 4 == 0:
+        if idx // 4 == 0:
             ax.set_title(f"{subrun.replace('_', ' ')}")
 
         ax.set_xlabel(hyperparam_name)
