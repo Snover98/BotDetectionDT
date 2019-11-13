@@ -59,7 +59,6 @@ def plot_model_res_comp_color_map(res: ModelComparisonResult, hyperparam_name: s
     metrics = ['accuracy', 'f1 score', 'precision', 'recall']
     fig, _ = plot_color_map(np.stack(res), subrun_name + " " + model_name.replace('_', ' '), hyperparam_name, hyperparam_vals, metrics)
     plt.savefig(f"graphs/{model_name}_{subrun_name.replace(' ', '_')}_metrics.png")
-    plt.show()
     plt.close(fig)
 
 
@@ -246,7 +245,6 @@ def eval_results(y_true, y_pred, subrun_name: str = None, verbose: bool = False)
         confusion_matrix_title = subrun_name.replace('_', ' ') + " Confusion Matrix"
         fig, ax = plot_confusion_matrix(y_true, y_pred, ['Human', 'Bot'], title=confusion_matrix_title)
         plt.savefig(f"graphs/{confusion_matrix_title.replace(' ', '_')}.png")
-        plt.show()
         plt.close(fig)
 
     return EvaluationResult(accuracy, f1_score, precision, recall)
@@ -382,7 +380,6 @@ def eval_KNN():
     fig = plot_similar_models(run_name, KNN_names, 'n_neighbors', K_vals, KNN_results)
     fig.suptitle("KNN")
     plt.savefig(f"graphs/KNN_results.png")
-    plt.show()
     plt.close(fig)
 
 
@@ -412,7 +409,6 @@ def eval_SVM():
     fig = plot_similar_models(run_name, SVM_names, 'C', C_vals, SVM_results)
     fig.suptitle("SVM")
     plt.savefig(f"graphs/SVM_results.png")
-    plt.show()
     plt.close(fig)
 
 
@@ -449,7 +445,6 @@ def eval_trees():
     fig = plot_similar_models(run_name, tree_names, 'min_samples_split', min_samples_vals, tree_results)
     fig.suptitle("Decision Tree")
     plt.savefig(f"graphs/Trees_results.png")
-    plt.show()
     plt.close(fig)
 
 
@@ -477,7 +472,6 @@ def eval_rand_forest():
                               random_forest_results)
     fig.suptitle("Random Forest")
     plt.savefig(f"graphs/Rand_Forest_results.png")
-    plt.show()
     plt.close(fig)
 
 
@@ -503,7 +497,6 @@ def eval_adaboost():
     fig = plot_similar_models(run_name, adaboost_names, 'n_estimators', num_estimators_vals, adaboost_results)
     fig.suptitle("AdaBoost")
     plt.savefig(f"graphs/AdaBoost_results.png")
-    plt.show()
     plt.close(fig)
 
 
