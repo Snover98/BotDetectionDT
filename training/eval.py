@@ -6,13 +6,19 @@ import numpy as np
 import matplotlib.pyplot as plt
 import itertools
 from typing import NamedTuple, List, Tuple
+import argparse
 
 from sklearn.metrics import confusion_matrix
 from sklearn.utils.multiclass import unique_labels
 from sklearn.metrics import precision_recall_fscore_support, accuracy_score
 
-from model.classification_model import BotClassifier
-from training.utils import get_all_subrun_names
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.svm import SVC
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier
+
+from data.dataset import get_dataloaders, UsersDataset
+from training.utils import *
 
 
 class Identity(nn.Module):
@@ -168,7 +174,7 @@ def load_train_test_features(subrun_name: str):
 def split_df_ids_classes_features(df: pd.DataFrame):
     classes = df['class']
     user_ids = df['user_id']
-    features = df.drop('label', axis=1).drop('plant', axis=1)
+    features = df.drop('class', axis=1).drop('user_id', axis=1)
 
     return user_ids, classes, features
 
@@ -280,3 +286,221 @@ def plot_similar_models(run_name: str, model_names: List[str], hyperparam_name: 
         fig, _ = plot_model_comparison(run_name, hyperparam_name, hyperparam_vals, comp_res, fig, model_name)
 
     return fig
+
+
+def extract_features():
+    run_name = "Final_Training"
+
+    ds = UsersDataset(it_flag=True)
+    train_dl, test_dl = get_dataloaders(ds, train_ratio=0.8, batch_size=8, load_rand_state=True)
+
+    for use_gdelt, use_TCN in itertools.product([False, True], [False, True]):
+        subrun_name = get_subrun_name(run_name, use_gdelt, use_TCN)
+        print("Extracting features for " + subrun_name.replace('_', ' '))
+        clf = create_model(use_gdelt, use_TCN)
+        clf.load_state_dict(torch.load(f"checkpoints/{subrun_name}.model"))
+        extract_and_save_features(clf, train_dl, test_dl, subrun_name)
+
+    print("Finished extraction")
+
+
+def evaluate_pytorch_models():
+    run_name = "Final_Training"
+
+    ds = UsersDataset(it_flag=True)
+    _, test_dl = get_dataloaders(ds, train_ratio=0.8, batch_size=8, load_rand_state=True)
+
+    for use_gdelt, use_TCN in itertools.product([False, True], [False, True]):
+        subrun_name = get_subrun_name(run_name, use_gdelt, use_TCN)
+        print("Evaluating predictions for " + subrun_name.replace('_', ' '))
+        clf = create_model(use_gdelt, use_TCN)
+        clf.load_state_dict(torch.load(f"checkpoints/{subrun_name}.model"))
+        eval_torch_classifier(clf, test_dl, subrun_name)
+
+
+def eval_KNN():
+    run_name = "Final_Training"
+    print('===========================')
+    print("KNN eval")
+    print('===========================')
+    # KNN with Uniform & distance, hyperparam=K (3, 5, 7, 9, 15, 20, 30, 40, 50)
+    K_vals = (3, 5, 7, 9, 15, 20, 30, 40, 50)
+    # Uniform
+    uniform_results = compare_subruns_by_hyperparam_values(run_name, KNeighborsClassifier, {}, 'n_neighbors', K_vals)
+    print('Uniform Results:')
+    print(uniform_results)
+    # Distance
+    distance_results = compare_subruns_by_hyperparam_values(run_name, KNeighborsClassifier, {'weights': 'distance'},
+                                                            'n_neighbors ', K_vals)
+    print('Distance Results:')
+    print(distance_results)
+    # plot results
+    KNN_names = ['Uniform', 'Distance']
+    KNN_results = [uniform_results, distance_results]
+    fig = plot_similar_models(run_name, KNN_names, 'n_neighbors', K_vals, KNN_results)
+    plt.show()
+    plt.savefig(f"graphs/KNN_results.png")
+    plt.close(fig)
+
+
+def eval_SVM():
+    run_name = "Final_Training"
+
+    print('===========================')
+    print("SVM eval")
+    print('===========================')
+    # SVM with kernels (Linear, Poly, Rbf, Sigmoid), hyperparam=C (0.25, 0.5, 1, 5)
+    C_vals = (0.25, 0.5, 1.0, 5.0)
+    # linear
+    linear_results = compare_subruns_by_hyperparam_values(run_name, SVC, {'kernel': 'linear'}, 'C', C_vals)
+    print('Linear Results:')
+    print(linear_results)
+    # Poly
+    poly_results = compare_subruns_by_hyperparam_values(run_name, SVC, {'kernel': 'poly'}, 'C', C_vals)
+    print('Poly Results:')
+    print(poly_results)
+    # Rbf
+    rbf_results = compare_subruns_by_hyperparam_values(run_name, SVC, {}, 'C', C_vals)
+    print('Rbf Results:')
+    print(rbf_results)
+    # Sigmoid
+    sigmoid_results = compare_subruns_by_hyperparam_values(run_name, SVC, {'kernel': 'sigmoid'}, 'C', C_vals)
+    print('Sigmoid Results:')
+    print(sigmoid_results)
+    # plot results
+    SVM_names = ['Linear', 'Poly', 'Rbf', 'Sigmoid']
+    SVM_results = [linear_results, poly_results, rbf_results, sigmoid_results]
+    fig = plot_similar_models(run_name, SVM_names, 'C', C_vals, SVM_results)
+    plt.show()
+    plt.savefig(f"graphs/SVM_results.png")
+    plt.close(fig)
+
+
+def eval_trees():
+    run_name = "Final_Training"
+    print('===========================')
+    print("Decision Tree eval")
+    print('===========================')
+    # Decision Tree with different max features (None, 0.6, log2, auto, 0.8), hyperparam=min_samples_split (2, 5, 10, 30, 50)
+    min_samples_vals = (2, 5, 10, 30, 50)
+    # None
+    none_results = compare_subruns_by_hyperparam_values(run_name, DecisionTreeClassifier, {}, "min_samples_split",
+                                                        min_samples_vals)
+    print("100% max features:")
+    print(none_results)
+    # 0.6
+    point6_results = compare_subruns_by_hyperparam_values(run_name, DecisionTreeClassifier, {'max_features': 0.6},
+                                                          "min_samples_split", min_samples_vals)
+    print("60% max features:")
+    print(point6_results)
+    # log2
+    log2_results = compare_subruns_by_hyperparam_values(run_name, DecisionTreeClassifier, {'max_features': 'log2'},
+                                                        "min_samples_split", min_samples_vals)
+    print("log2 max features:")
+    print(log2_results)
+    # auto
+    auto_results = compare_subruns_by_hyperparam_values(run_name, DecisionTreeClassifier, {'max_features': 'auto'},
+                                                        "min_samples_split", min_samples_vals)
+    print("auto max features:")
+    print(auto_results)
+    # 0.8
+    point8_results = compare_subruns_by_hyperparam_values(run_name, DecisionTreeClassifier, {'max_features': 0.8},
+                                                          "min_samples_split", min_samples_vals)
+    print("80% max features:")
+    print(point8_results)
+    # plot results
+    tree_names = ['None', '0.6', 'log2', 'auto', '0.8']
+    tree_results = [none_results, point6_results, log2_results, auto_results, point8_results]
+    fig = plot_similar_models(run_name, tree_names, 'min_samples_split', min_samples_vals, tree_results)
+    plt.show()
+    plt.savefig(f"graphs/Trees_results.png")
+    plt.close(fig)
+
+
+def eval_rand_forest():
+    run_name = "Final_Training"
+
+    print('===========================')
+    print("Random Forest eval")
+    print('===========================')
+    # Random Forest with different number of estimators (2, 5, 10, 20, 30, 50, 90) hyperparam=min_samples_split (2, 5, 10, 30, 50)
+    min_samples_vals = (2, 5, 10, 30, 50)
+    num_estimators_vals = (2, 5, 10, 20, 30, 50, 90)
+    random_forest_results = [
+        compare_subruns_by_hyperparam_values(run_name, RandomForestClassifier, {'n_estimators': n_estimators},
+                                             'min_samples_split', min_samples_vals)
+        for n_estimators in num_estimators_vals
+    ]
+    # print results
+    for n_estimators, results in zip(num_estimators_vals, random_forest_results):
+        print(f"{n_estimators} estimators:")
+        print(results)
+
+    # plot results
+    random_forest_names = [str(val) for val in num_estimators_vals]
+    fig = plot_similar_models(run_name, random_forest_names, 'min_samples_split', min_samples_vals,
+                              random_forest_results)
+    plt.show()
+    plt.savefig(f"graphs/Rand_Forest_results.png")
+    plt.close(fig)
+
+
+def eval_adaboost():
+    run_name = "Final_Training"
+
+    print('===========================')
+    print("Adaboost eval")
+    print('===========================')
+    # AdaBoost with DecisionTrees, hyperparam=number of estimators (10, 50, 100, 200)
+    # Using SAMME.R
+    num_estimators_vals = (10, 50, 100, 200)
+    SAMME_R_results = compare_subruns_by_hyperparam_values(run_name, AdaBoostClassifier, {}, 'n_estimators',
+                                                           num_estimators_vals)
+    print("SAMME.R:")
+    print(SAMME_R_results)
+    # Using SAMME
+    SAMME_results = compare_subruns_by_hyperparam_values(run_name, AdaBoostClassifier, {'algorithm': 'SAMME'},
+                                                         'n_estimators', num_estimators_vals)
+    print("SAMME:")
+    print(SAMME_results)
+    # plot results
+    adaboost_names = ['SAMME.R', 'SAMME']
+    adaboost_results = [SAMME_R_results, SAMME_results]
+    fig = plot_similar_models(run_name, adaboost_names, 'n_estimators', num_estimators_vals, adaboost_results)
+    plt.show()
+    plt.savefig(f"graphs/Adaboost_results.png")
+    plt.close(fig)
+
+
+def evaluate_sklearn_models():
+    eval_KNN()
+    eval_SVM()
+    eval_trees()
+    eval_rand_forest()
+    eval_adaboost()
+
+
+def evaluate_models():
+    evaluate_pytorch_models()
+    evaluate_sklearn_models()
+
+
+def main():
+    parser = argparse.ArgumentParser(description='Run the eval program.')
+    subparsers = parser.add_subparsers(title='Subcommands', description='extract_features, evaluate_classifiers')
+    parser.set_defaults(func=lambda: print("Please choose a subcommand, use --help if you are confused"))
+
+    # The subparser for the feature extraction
+    extraction_parser = subparsers.add_parser('extract_features',
+                                              help='Extract the features of the users using our trained models.')
+    extraction_parser.set_defaults(func=extract_features)
+
+    # The subparser for the model evaluation
+    eval_parser = subparsers.add_parser('evaluate_classifiers', help='Evaluate all classifiers.')
+    eval_parser.set_defaults(func=evaluate_models)
+
+    parser.parse_args().func()
+
+
+if __name__ == "__main__":
+    main()
