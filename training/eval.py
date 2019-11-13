@@ -318,8 +318,6 @@ def plot_model_comparison(run_name: str, hyperparam_name: str, hyperparam_vals: 
         if legend:
             ax.legend()
 
-    fig.suptitle(f"Test Set Prediction Metrics by {hyperparam_name}")
-
     return fig, axes
 
 
@@ -382,6 +380,7 @@ def eval_KNN():
     KNN_names = ['Uniform', 'Distance']
     KNN_results = [uniform_results, distance_results]
     fig = plot_similar_models(run_name, KNN_names, 'n_neighbors', K_vals, KNN_results)
+    fig.suptitle("KNN")
     plt.savefig(f"graphs/KNN_results.png")
     plt.show()
     plt.close(fig)
@@ -411,6 +410,7 @@ def eval_SVM():
     SVM_names = ['Linear', 'Poly', 'Rbf', 'Sigmoid']
     SVM_results = [linear_results, poly_results, rbf_results, sigmoid_results]
     fig = plot_similar_models(run_name, SVM_names, 'C', C_vals, SVM_results)
+    fig.suptitle("SVM")
     plt.savefig(f"graphs/SVM_results.png")
     plt.show()
     plt.close(fig)
@@ -447,6 +447,7 @@ def eval_trees():
     tree_names = ['None', '0.6', 'log2', 'auto', '0.8']
     tree_results = [none_results, point6_results, log2_results, auto_results, point8_results]
     fig = plot_similar_models(run_name, tree_names, 'min_samples_split', min_samples_vals, tree_results)
+    fig.suptitle("Decision Tree")
     plt.savefig(f"graphs/Trees_results.png")
     plt.show()
     plt.close(fig)
@@ -474,6 +475,7 @@ def eval_rand_forest():
     random_forest_names = [str(val) for val in num_estimators_vals]
     fig = plot_similar_models(run_name, random_forest_names, 'min_samples_split', min_samples_vals,
                               random_forest_results)
+    fig.suptitle("Random Forest")
     plt.savefig(f"graphs/Rand_Forest_results.png")
     plt.show()
     plt.close(fig)
@@ -483,23 +485,24 @@ def eval_adaboost():
     run_name = "Final_Training"
 
     print('===========================')
-    print("Adaboost eval")
+    print("AdaBoost eval")
     print('===========================')
     # AdaBoost with DecisionTrees, hyperparam=number of estimators (10, 50, 100, 200)
     # Using SAMME.R
     num_estimators_vals = (10, 50, 100, 200)
     SAMME_R_results = compare_subruns_by_hyperparam_values(run_name, AdaBoostClassifier, {}, 'n_estimators',
                                                            num_estimators_vals)
-    plot_subruns_res_comp_color_map(SAMME_R_results, 'n_estimators', num_estimators_vals, 'Adaboost_SAMME_R')
+    plot_subruns_res_comp_color_map(SAMME_R_results, 'n_estimators', num_estimators_vals, 'AdaBoost_SAMME_R')
     # Using SAMME
     SAMME_results = compare_subruns_by_hyperparam_values(run_name, AdaBoostClassifier, {'algorithm': 'SAMME'},
                                                          'n_estimators', num_estimators_vals)
-    plot_subruns_res_comp_color_map(SAMME_results, 'n_estimators', num_estimators_vals, 'Adaboost_SAMME')
+    plot_subruns_res_comp_color_map(SAMME_results, 'n_estimators', num_estimators_vals, 'AdaBoost_SAMME')
     # plot results
     adaboost_names = ['SAMME.R', 'SAMME']
     adaboost_results = [SAMME_R_results, SAMME_results]
     fig = plot_similar_models(run_name, adaboost_names, 'n_estimators', num_estimators_vals, adaboost_results)
-    plt.savefig(f"graphs/Adaboost_results.png")
+    fig.suptitle("AdaBoost")
+    plt.savefig(f"graphs/AdaBoost_results.png")
     plt.show()
     plt.close(fig)
 
