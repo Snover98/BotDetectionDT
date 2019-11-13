@@ -270,7 +270,7 @@ def plot_model_comparison(run_name: str, hyperparam_name: str, hyperparam_vals: 
 
         ax.set_xlabel(hyperparam_name)
         ax.set_ylabel(metric_name)
-        if legend and idx == 0:
+        if legend:
             ax.legend()
 
     fig.suptitle(f"Test Set Prediction Metrics by {hyperparam_name}")
