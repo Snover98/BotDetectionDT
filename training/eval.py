@@ -142,9 +142,9 @@ def extract_dataloader_features(trained_extractor: BotClassifier, dl):
     for batch, labels in dl:
         labels = labels.cpu().numpy()
         labels = list(map(lambda i: 'Human' if i == 0 else 'Bot', labels))
-        ids = [user.id for user in batch]
+        ids = [user.id for user in batch[0]]
 
-        features = trained_extractor(batch).cpu().detach().numpy()
+        features = trained_extractor(*batch).cpu().detach().numpy()
         batch_df = pd.DataFrame(data=features)
         batch_df.loc[:, 'class'] = labels
         batch_df.loc[:, 'user_id'] = ids
