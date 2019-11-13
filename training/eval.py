@@ -118,7 +118,7 @@ def eval_torch_classifier(model, test_dl, subrun_name: str = None):
     y_trues, y_preds = [], []
 
     for batch, labels in test_dl:
-        batch, labels = batch.to(device), labels.to(device)
+        labels = labels.to(device)
         y_hat = model.forward(*batch)
 
         tot_loss += loss_fn(y_hat, labels).item()
