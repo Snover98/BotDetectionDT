@@ -201,8 +201,8 @@ def eval_results(y_true, y_pred, subrun_name: str = None):
     if subrun_name is not None:
         confusion_matrix_title = subrun_name.replace('_', ' ') + " Confusion Matrix"
         fig, ax = plot_confusion_matrix(y_true, y_pred, ['Human', 'Bot'], title=confusion_matrix_title)
-        plt.show()
         plt.savefig(f"graphs/{confusion_matrix_title.replace(' ', '_')}.png")
+        plt.show()
         plt.close(fig)
 
     return EvaluationResult(accuracy, f1_score, precision, recall)
@@ -340,8 +340,8 @@ def eval_KNN():
     KNN_names = ['Uniform', 'Distance']
     KNN_results = [uniform_results, distance_results]
     fig = plot_similar_models(run_name, KNN_names, 'n_neighbors', K_vals, KNN_results)
-    plt.show()
     plt.savefig(f"graphs/KNN_results.png")
+    plt.show()
     plt.close(fig)
 
 
@@ -373,8 +373,8 @@ def eval_SVM():
     SVM_names = ['Linear', 'Poly', 'Rbf', 'Sigmoid']
     SVM_results = [linear_results, poly_results, rbf_results, sigmoid_results]
     fig = plot_similar_models(run_name, SVM_names, 'C', C_vals, SVM_results)
-    plt.show()
     plt.savefig(f"graphs/SVM_results.png")
+    plt.show()
     plt.close(fig)
 
 
@@ -414,8 +414,8 @@ def eval_trees():
     tree_names = ['None', '0.6', 'log2', 'auto', '0.8']
     tree_results = [none_results, point6_results, log2_results, auto_results, point8_results]
     fig = plot_similar_models(run_name, tree_names, 'min_samples_split', min_samples_vals, tree_results)
-    plt.show()
     plt.savefig(f"graphs/Trees_results.png")
+    plt.show()
     plt.close(fig)
 
 
@@ -442,8 +442,8 @@ def eval_rand_forest():
     random_forest_names = [str(val) for val in num_estimators_vals]
     fig = plot_similar_models(run_name, random_forest_names, 'min_samples_split', min_samples_vals,
                               random_forest_results)
-    plt.show()
     plt.savefig(f"graphs/Rand_Forest_results.png")
+    plt.show()
     plt.close(fig)
 
 
@@ -469,8 +469,8 @@ def eval_adaboost():
     adaboost_names = ['SAMME.R', 'SAMME']
     adaboost_results = [SAMME_R_results, SAMME_results]
     fig = plot_similar_models(run_name, adaboost_names, 'n_estimators', num_estimators_vals, adaboost_results)
-    plt.show()
     plt.savefig(f"graphs/Adaboost_results.png")
+    plt.show()
     plt.close(fig)
 
 
