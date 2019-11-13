@@ -57,8 +57,8 @@ def model_comp_result_from_eval_results(evaluation_results: List[EvaluationResul
 def plot_model_res_comp_color_map(res: ModelComparisonResult, hyperparam_name: str, hyperparam_vals, subrun_name: str,
                                   model_name: str):
     metrics = ['accuracy', 'f1 score', 'precision', 'recall']
-    fig, _ = plot_color_map(np.stack(res), subrun_name, hyperparam_name, hyperparam_vals, metrics)
-    plt.savefig(f"graphs/{model_name}_{subrun_name}_metrics.png")
+    fig, _ = plot_color_map(np.stack(res), subrun_name + " " + model_name.replace('_', ' '), hyperparam_name, hyperparam_vals, metrics)
+    plt.savefig(f"graphs/{model_name}_{subrun_name.replace(' ', '_')}_metrics.png")
     plt.show()
     plt.close(fig)
 
@@ -67,12 +67,12 @@ def plot_subruns_res_comp_color_map(res: SubrunsModelComparisionResult, hyperpar
                                     model_name: str):
     plot_model_res_comp_color_map(res.LSTM_result, hyperparam_name, hyperparam_vals, 'LSTM', model_name)
     plot_model_res_comp_color_map(res.TCN_result, hyperparam_name, hyperparam_vals, 'TCN', model_name)
-    plot_model_res_comp_color_map(res.LSTM_GDELT_result, hyperparam_name, hyperparam_vals, 'LSTM w/ GDELT', model_name)
-    plot_model_res_comp_color_map(res.TCN_GDELT_result, hyperparam_name, hyperparam_vals, 'TCN w/ GDELT', model_name)
+    plot_model_res_comp_color_map(res.LSTM_GDELT_result, hyperparam_name, hyperparam_vals, 'LSTM with GDELT', model_name)
+    plot_model_res_comp_color_map(res.TCN_GDELT_result, hyperparam_name, hyperparam_vals, 'TCN with GDELT', model_name)
 
 
 def plot_color_map(mat, title: str, x_label, xticklabels, yticklabels, cmap=plt.cm.Blues):
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(12,8))
     im = ax.imshow(mat, interpolation='nearest', cmap=cmap)
     ax.figure.colorbar(im, ax=ax)
     # We want to show all ticks...
@@ -87,7 +87,7 @@ def plot_color_map(mat, title: str, x_label, xticklabels, yticklabels, cmap=plt.
     ax.set_yticks(np.arange(mat.shape[0] + 1) - .5, minor=True)
 
     # Loop over data dimensions and create text annotations.
-    thresh = mat.max() / 2.
+    thresh = mat.mean()
     for i in range(mat.shape[0]):
         for j in range(mat.shape[1]):
             ax.text(j, i, format(mat[i, j], '.5f'),
