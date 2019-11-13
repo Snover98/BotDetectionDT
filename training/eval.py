@@ -90,7 +90,7 @@ def plot_color_map(mat, title: str, x_label, xticklabels, yticklabels, cmap=plt.
     thresh = mat.max() / 2.
     for i in range(mat.shape[0]):
         for j in range(mat.shape[1]):
-            ax.text(j, i, format(mat[i, j], 'd'),
+            ax.text(j, i, format(mat[i, j], '.5f'),
                     ha="center", va="center",
                     color="white" if mat[i, j] > thresh else "black")
     fig.tight_layout()
