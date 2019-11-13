@@ -290,6 +290,7 @@ def plot_similar_models(run_name: str, model_names: List[str], hyperparam_name: 
 
 def extract_features():
     run_name = "Final_Training"
+    device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
     ds = UsersDataset(it_flag=True)
     train_dl, test_dl = get_dataloaders(ds, train_ratio=0.8, batch_size=8, load_rand_state=True)
@@ -298,7 +299,7 @@ def extract_features():
         subrun_name = get_subrun_name(run_name, use_gdelt, use_TCN)
         print("Extracting features for " + subrun_name.replace('_', ' '))
         clf = create_model(use_gdelt, use_TCN)
-        clf.load_state_dict(torch.load(f"checkpoints/{subrun_name}.model"))
+        clf.load_state_dict(torch.load(f"checkpoints/{subrun_name}.model", map_location=device))
         extract_and_save_features(clf, train_dl, test_dl, subrun_name)
 
     print("Finished extraction")
@@ -306,6 +307,7 @@ def extract_features():
 
 def evaluate_pytorch_models():
     run_name = "Final_Training"
+    device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
     ds = UsersDataset(it_flag=True)
     _, test_dl = get_dataloaders(ds, train_ratio=0.8, batch_size=8, load_rand_state=True)
@@ -314,7 +316,7 @@ def evaluate_pytorch_models():
         subrun_name = get_subrun_name(run_name, use_gdelt, use_TCN)
         print("Evaluating predictions for " + subrun_name.replace('_', ' '))
         clf = create_model(use_gdelt, use_TCN)
-        clf.load_state_dict(torch.load(f"checkpoints/{subrun_name}.model"))
+        clf.load_state_dict(torch.load(f"checkpoints/{subrun_name}.model", map_location=device))
         eval_torch_classifier(clf, test_dl, subrun_name)
 
 
