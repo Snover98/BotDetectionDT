@@ -331,7 +331,7 @@ def plot_similar_models(run_name: str, model_names: List[str], hyperparam_name: 
 
 
 def plot_tsne(df: pd.DataFrame, subrun_name: str):
-    tsne = TSNE(n_components=2, verbose=True)
+    tsne = TSNE(n_components=2, verbose=False)
 
     user_ids, classes, features = split_df_ids_classes_features(df)
 
