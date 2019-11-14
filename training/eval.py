@@ -563,8 +563,8 @@ def main():
     eval_parser.set_defaults(func=evaluate_models)
 
     # The subparser for tsne plotting
-    eval_parser = subparsers.add_parser('plot_tsne', help='Plot tsne for all 4 subruns.')
-    eval_parser.set_defaults(func=plot_all_tsne)
+    tsne_parser = subparsers.add_parser('plot_tsne', help='Plot tsne for all 4 subruns.')
+    tsne_parser.set_defaults(func=plot_all_tsne)
 
     parser.parse_args().func()
 
