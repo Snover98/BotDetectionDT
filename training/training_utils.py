@@ -135,7 +135,7 @@ class Trainer(abc.ABC):
             test_loss.append(loss)
             test_acc.append(acc)
 
-            if best_acc is None or acc > best_acc:
+            if best_acc is None or acc >= best_acc:
                 best_acc = acc
                 if checkpoints is not None:
                     torch.save(self.model.state_dict(), f"checkpoints/{checkpoints}")
