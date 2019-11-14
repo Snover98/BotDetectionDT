@@ -352,7 +352,7 @@ def plot_tsne(df: pd.DataFrame, subrun_name: str):
 
 
 def plot_subrun_tsne(subrun_name: str):
-    train_df, test_df = load_train_test_features()
+    train_df, test_df = load_train_test_features(subrun_name)
     plot_tsne(train_df, f"{subrun_name}_train")
     plot_tsne(test_df, f"{subrun_name}_test")
 
