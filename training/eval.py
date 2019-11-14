@@ -357,7 +357,8 @@ def plot_subrun_tsne(subrun_name: str):
     plot_tsne(test_df, f"{subrun_name}_test")
 
 
-def plot_all_tsne(run_name: str):
+def plot_all_tsne():
+    run_name = "Final_Training"
     for subrun_name in get_all_subrun_names(run_name):
         plot_subrun_tsne(subrun_name)
 
