@@ -9,7 +9,7 @@ from typing import NamedTuple, List, Tuple
 import argparse
 
 from sklearn.metrics import confusion_matrix
-from sklearn.utils.multiclass import unique_labels
+from sklearn.manifold import TSNE
 from sklearn.metrics import precision_recall_fscore_support, accuracy_score
 
 from sklearn.neighbors import KNeighborsClassifier
@@ -57,7 +57,8 @@ def model_comp_result_from_eval_results(evaluation_results: List[EvaluationResul
 def plot_model_res_comp_color_map(res: ModelComparisonResult, hyperparam_name: str, hyperparam_vals, subrun_name: str,
                                   model_name: str):
     metrics = ['accuracy', 'f1 score', 'precision', 'recall']
-    fig, _ = plot_color_map(np.stack(res), subrun_name + " " + model_name.replace('_', ' '), hyperparam_name, hyperparam_vals, metrics)
+    fig, _ = plot_color_map(np.stack(res), subrun_name + " " + model_name.replace('_', ' '), hyperparam_name,
+                            hyperparam_vals, metrics)
     plt.savefig(f"graphs/{model_name}_{subrun_name.replace(' ', '_')}_metrics.png")
     plt.close(fig)
 
@@ -66,12 +67,13 @@ def plot_subruns_res_comp_color_map(res: SubrunsModelComparisionResult, hyperpar
                                     model_name: str):
     plot_model_res_comp_color_map(res.LSTM_result, hyperparam_name, hyperparam_vals, 'LSTM', model_name)
     plot_model_res_comp_color_map(res.TCN_result, hyperparam_name, hyperparam_vals, 'TCN', model_name)
-    plot_model_res_comp_color_map(res.LSTM_GDELT_result, hyperparam_name, hyperparam_vals, 'LSTM with GDELT', model_name)
+    plot_model_res_comp_color_map(res.LSTM_GDELT_result, hyperparam_name, hyperparam_vals, 'LSTM with GDELT',
+                                  model_name)
     plot_model_res_comp_color_map(res.TCN_GDELT_result, hyperparam_name, hyperparam_vals, 'TCN with GDELT', model_name)
 
 
 def plot_color_map(mat, title: str, x_label, xticklabels, yticklabels, cmap=plt.cm.Blues):
-    fig, ax = plt.subplots(figsize=(12,8))
+    fig, ax = plt.subplots(figsize=(12, 8))
     im = ax.imshow(mat, interpolation='nearest', cmap=cmap)
     ax.figure.colorbar(im, ax=ax)
     # We want to show all ticks...
@@ -328,6 +330,38 @@ def plot_similar_models(run_name: str, model_names: List[str], hyperparam_name: 
     return fig
 
 
+def plot_tsne(df: pd.DataFrame, subrun_name: str):
+    tsne = TSNE(n_components=2, verbose=True)
+
+    user_ids, classes, features = split_df_ids_classes_features(df)
+
+    tsne_results = tsne.fit_transform(features)
+
+    fig, ax = plt.subplots()
+
+    label_names = ["Human", "Bot"]
+    for idx, color in enumerate(['tab:blue', 'tab:orange']):
+        used_tsne_results = tsne_results[classes == idx]
+        ax.scatter(used_tsne_results[:, 0], used_tsne_results[:, 1], c=color, alpha=0.3, label=label_names[idx])
+
+    fig.suptitle(f"{subrun_name.replace('_', ' ')} TSNE")
+    ax.legend()
+    plt.savefig(f"graphs/{subrun_name}_tsne.png")
+    plt.show()
+    plt.close(fig)
+
+
+def plot_subrun_tsne(subrun_name: str):
+    train_df, test_df = load_train_test_features()
+    plot_tsne(train_df, f"{subrun_name}_train")
+    plot_tsne(test_df, f"{subrun_name}_test")
+
+
+def plot_all_tsne(run_name: str):
+    for subrun_name in get_all_subrun_names(run_name):
+        plot_subrun_tsne(subrun_name)
+
+
 def extract_features():
     run_name = "Final_Training"
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
@@ -515,7 +549,8 @@ def evaluate_models():
 
 def main():
     parser = argparse.ArgumentParser(description='Run the eval program.')
-    subparsers = parser.add_subparsers(title='Subcommands', description='extract_features, evaluate_classifiers')
+    subparsers = parser.add_subparsers(title='Subcommands',
+                                       description='extract_features, evaluate_classifiers, plot_tsne')
     parser.set_defaults(func=lambda: print("Please choose a subcommand, use --help if you are confused"))
 
     # The subparser for the feature extraction
@@ -526,6 +561,10 @@ def main():
     # The subparser for the model evaluation
     eval_parser = subparsers.add_parser('evaluate_classifiers', help='Evaluate all classifiers.')
     eval_parser.set_defaults(func=evaluate_models)
+
+    # The subparser for tsne plotting
+    eval_parser = subparsers.add_parser('plot_tsne', help='Plot tsne for all 4 subruns.')
+    eval_parser.set_defaults(func=plot_all_tsne)
 
     parser.parse_args().func()
 
