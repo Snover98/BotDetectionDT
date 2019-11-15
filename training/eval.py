@@ -176,7 +176,7 @@ def eval_torch_classifier(model, test_dl, subrun_name: str = None):
     avg_loss = tot_loss / y_pred.shape[0]
 
     print(f"The test average loss is:\t{avg_loss}")
-    eval_results(y_true, y_pred, subrun_name, verbose=True)
+    return eval_results(y_true, y_pred, subrun_name, verbose=True)
 
 
 def extract_dataloader_features(trained_extractor: BotClassifier, dl):
