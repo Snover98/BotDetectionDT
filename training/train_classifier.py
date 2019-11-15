@@ -52,7 +52,7 @@ def parse_arguments():
                             WARNING: if you change it from 100, you must retrain the wordToVec model.""")
     parser.add_argument('--rec_hidden_dim', dest='rec_hidden_dim', default=1024, type=int,
                         help="""The hidden dimension of the temporal extractor. default=1024.""")
-    parser.add_argument('--tweet_features_dim', dest='tweet_features_dim', default=128, type=int,
+    parser.add_argument('--tweet_features_dim', dest='tweet_features_dim', default=256, type=int,
                         help="""The output dimension of the temporal extractor. default=128.""")
     parser.add_argument('--hidden_dim', dest='hidden_dim', default=1024, type=int,
                         help="""The hidden dimension of the classifier. default=1024.""")
