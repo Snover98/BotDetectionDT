@@ -57,7 +57,7 @@ def model_comp_result_from_eval_results(evaluation_results: List[EvaluationResul
 def plot_model_res_comp_color_map(res: ModelComparisonResult, hyperparam_name: str, hyperparam_vals, subrun_name: str,
                                   model_name: str):
     metrics = ['accuracy', 'f1 score', 'precision', 'recall']
-    fig, _ = plot_color_map(np.stack(res), subrun_name + " " + model_name.replace('_', ' '), hyperparam_name,
+    fig, _ = plot_color_map(np.stack(res), model_name.replace('_', ' ') + " " + subrun_name, hyperparam_name,
                             hyperparam_vals, metrics)
     plt.savefig(f"graphs/{model_name}_{subrun_name.replace(' ', '_')}_metrics.png", bbox_inches="tight")
     plt.close(fig)
@@ -385,12 +385,19 @@ def evaluate_pytorch_models():
     ds = UsersDataset(it_flag=True)
     _, test_dl = get_dataloaders(ds, train_ratio=0.8, batch_size=8, load_rand_state=True)
 
+    results = []
+
     for use_gdelt, use_TCN in itertools.product([False, True], [False, True]):
         subrun_name = get_subrun_name(run_name, use_gdelt, use_TCN)
         print("Evaluating predictions for " + subrun_name.replace('_', ' '))
         clf = create_model(use_gdelt, use_TCN)
         clf.load_state_dict(torch.load(f"checkpoints/{subrun_name}.model", map_location=device))
-        eval_torch_classifier(clf, test_dl, subrun_name)
+        results.append(eval_torch_classifier(clf, test_dl, subrun_name))
+
+    results = model_comp_result_from_eval_results(results)
+    model_names = ['LSTM', 'TCN', 'LSTM with GDELT', 'TCN with GDELT']
+
+    plot_model_res_comp_color_map(results, "Model", model_names, "Models Evaluation", "Original")
 
 
 def eval_KNN():
