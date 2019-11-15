@@ -337,7 +337,7 @@ def plot_tsne(df: pd.DataFrame, subrun_name: str):
 
     tsne_results = tsne.fit_transform(features)
 
-    fig, ax = plt.subplots(figsize=(25.6, 19.2))
+    fig, ax = plt.subplots()
 
     label_names = ["Human", "Bot"]
     for idx, color in enumerate(['tab:blue', 'tab:orange']):
@@ -346,7 +346,7 @@ def plot_tsne(df: pd.DataFrame, subrun_name: str):
 
     fig.suptitle(f"{subrun_name.replace('_', ' ')} TSNE")
     ax.legend()
-    plt.savefig(f"graphs/{subrun_name}_tsne.png")
+    plt.savefig(f"graphs/{subrun_name}_tsne.png", bbox_inches="tight")
     plt.show()
     plt.close(fig)
 
