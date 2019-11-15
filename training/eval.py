@@ -75,7 +75,6 @@ def plot_subruns_res_comp_color_map(res: SubrunsModelComparisionResult, hyperpar
 def plot_color_map(mat, title: str, x_label, xticklabels, yticklabels, cmap=plt.cm.Blues):
     fig, ax = plt.subplots(figsize=(12, 8))
     im = ax.imshow(mat, interpolation='nearest', cmap=cmap)
-    ax.figure.colorbar(im, ax=ax)
     # We want to show all ticks...
     ax.set(xticks=np.arange(mat.shape[1]),
            yticks=np.arange(mat.shape[0]),
