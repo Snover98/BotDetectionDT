@@ -426,16 +426,19 @@ def eval_SVM():
     # SVM with kernels (Linear, Poly, Rbf, Sigmoid), hyperparam=C (0.25, 0.5, 1, 5)
     C_vals = (0.25, 0.5, 1.0, 2.5, 5.0, 10.0, 20.0)
     # linear
-    linear_results = compare_subruns_by_hyperparam_values(run_name, SVC, {'kernel': 'linear'}, 'C', C_vals)
+    linear_results = compare_subruns_by_hyperparam_values(run_name, SVC, {'kernel': 'linear', 'gamma': 'scale'}, 'C',
+                                                          C_vals)
     plot_subruns_res_comp_color_map(linear_results, 'C', C_vals, 'SVM_Linear')
     # Poly
-    poly_results = compare_subruns_by_hyperparam_values(run_name, SVC, {'kernel': 'poly'}, 'C', C_vals)
+    poly_results = compare_subruns_by_hyperparam_values(run_name, SVC, {'kernel': 'poly', 'gamma': 'scale'}, 'C',
+                                                        C_vals)
     plot_subruns_res_comp_color_map(poly_results, 'C', C_vals, 'SVM_Poly')
     # Rbf
-    rbf_results = compare_subruns_by_hyperparam_values(run_name, SVC, {}, 'C', C_vals)
+    rbf_results = compare_subruns_by_hyperparam_values(run_name, SVC, {'gamma': 'scale'}, 'C', C_vals)
     plot_subruns_res_comp_color_map(rbf_results, 'C', C_vals, 'SVM_Rbf')
     # Sigmoid
-    sigmoid_results = compare_subruns_by_hyperparam_values(run_name, SVC, {'kernel': 'sigmoid'}, 'C', C_vals)
+    sigmoid_results = compare_subruns_by_hyperparam_values(run_name, SVC, {'kernel': 'sigmoid', 'gamma': 'scale'}, 'C',
+                                                           C_vals)
     plot_subruns_res_comp_color_map(sigmoid_results, 'C', C_vals, 'SVM_Sigmoid')
     # plot results
     SVM_names = ['Linear', 'Poly', 'Rbf', 'Sigmoid']
